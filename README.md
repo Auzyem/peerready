@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PeerReady
 
-## Getting Started
+AI-powered peer review for academic manuscripts. Upload a paper (PDF or DOCX) and PeerReady
+routes it to a discipline-appropriate reviewer persona, runs a rigorous Claude-based review,
+and returns a structured verdict, eight scored quality dimensions, inline annotations — and,
+on demand, a harsher adversarial "Reviewer 2" critique that escalates the weaknesses a polite
+reviewer would soften.
 
-First, run the development server:
+> Status: working vertical slice, verified end-to-end against live Supabase + Anthropic.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## What it does
+
+1. **Upload** a manuscript (`.pdf` / `.docx`). It's stored, parsed, and section-extracted.
+2. **Discipline routing** — Claude identifies the field, sub-field, document type, and the most
+   appropriate reviewer persona (e.g. biomedical RCT, CS/ML theory, social-science qualitative).
+3. **Deep review** — a senior-reviewer pass scores the manuscript 1–10 across eight dimensions
+   (originality, significance, methodology, evidence quality, literature engagement, internal
+   logic, presentation clarity, ethical compliance), with a verdict, strength/weakness summaries,
+   and severity-tagged annotations.
+4. **Adversarial critique** (on demand) — a second, hostile pass grounded in the standard
+   review's findings. Briefed to *escalate, not repeat*, it returns numbered objections, each
+   with a quoted passage and a concrete required fix, plus the single biggest rejection risk.
+5. **Dashboard** — polls progress (`routing → reviewing → complete`) and presents the result in
+   an Overview tab and an Adversarial tab.
+
+## Tech stack
+
+- **Next.js 14** (App Router) + **TypeScript**
+- **Tailwind CSS** + **shadcn/ui**
+- **Supabase** — Postgres, Auth (email/password), Storage, row-level security
+- **Anthropic Claude** (`claude-sonnet-4-6`) via the Anthropic SDK
+- **`@vercel/functions`** `waitUntil` for detached pipeline execution
+- **Vitest** for unit tests; `pdf-parse` / `mammoth` for document parsing
+
+## Architecture
+
+- **User-facing API routes** use a cookie-bound Supabase server client, so **RLS** applies and
+  users only ever see their own data.
+- **The review pipeline runs detached** from the request via `waitUntil`, using a server-only
+  **service-role** client to persist results (it has no user cookie). The standard pipeline and
+  the adversarial pipeline follow the same pattern.
+- **Parsers and AI prompt modules are pure, independently testable units** (`lib/parsers`,
+  `lib/ai/prompts`). The shared Claude model is a single constant in `lib/ai/anthropic.ts`.
+- **Progress is tracked in the database**: `review_sessions.status` for the main pipeline and a
+  dedicated `adversarial_status` lifecycle (`not_started → running → complete | failed`) for the
+  on-demand pass, so state survives page reloads.
+
+```
+app/
+  (auth)/                 login + signup
+  (dashboard)/            sidebar shell, manuscripts list/detail, new-review flow, review page
+  api/
+    manuscripts/          create / list / get / delete
+    upload/               store + parse + insert draft
+    review/start/         create session + waitUntil(standard pipeline)
+    review/status/        poll status + nested results
+    review/adversarial/   on-demand adversarial pipeline trigger
+components/               layout, manuscripts, review (Overview + Adversarial panels)
+lib/
+  supabase/               browser / server (RLS) / admin (service-role) clients
+  ai/                     anthropic client, JSON helper, prompts, pipelines
+  parsers/                pdf + docx
+  types/                  domain model
+supabase/migrations/      001 initial schema, 002 adversarial status columns
+docs/superpowers/         design specs + implementation plans
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Getting started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You need a Supabase project and an Anthropic API key. Full step-by-step setup and a live
+verification walkthrough (including common gotchas) are in **[SETUP.md](./SETUP.md)**.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Quick version:
 
-## Learn More
+```bash
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# Apply both SQL migrations to your Supabase project (SQL editor):
+#   supabase/migrations/001_initial_schema.sql
+#   supabase/migrations/002_adversarial_status.sql
+# Then ensure Settings → API → Data API → Exposed schemas includes `public`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+cp .env.local.example .env.local   # fill in Supabase + Anthropic keys
+npm run dev                        # http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> Note: if `ANTHROPIC_API_KEY` (or the Supabase vars) is also set as an OS-level environment
+> variable, Next.js will not override it with `.env.local`. See SETUP.md → Troubleshooting.
 
-## Deploy on Vercel
+## Testing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm test            # Vitest unit tests (parsers, JSON helper, adversarial context builder)
+npx tsc --noEmit    # type check
+npm run build       # production build (runs lint)
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Roadmap (deferred — schema/types already exist)
+
+Journal matching, draft-to-draft progress comparison, XLSX export, Google OAuth, a settings
+page, a low-confidence "confirm field" step, rate limiting, and resolving critiques in the UI.
+
+## License
+
+Private project — all rights reserved.
