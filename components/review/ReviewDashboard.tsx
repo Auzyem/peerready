@@ -19,38 +19,62 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
   const [session, setSession] = useState<ReviewSession | null>(null)
   const [starting, setStarting] = useState(false)
   const activeRef = useRef(true)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Mirrors `session` so the poll loop can decide whether to keep polling even
+  // when a fetch throws (it has no fresh server value to read in that case).
+  const sessionRef = useRef<ReviewSession | null>(null)
+
+  const applySession = useCallback((s: ReviewSession | null) => {
+    sessionRef.current = s
+    setSession(s)
+  }, [])
 
   const poll = useCallback(async () => {
-    const res = await fetch(`/api/review/status/${sessionId}`)
-    const json = await res.json()
-    if (!activeRef.current) return
-    setSession(json.session)
-    const s = json.session as ReviewSession | null
-    const mainPending = !!s && s.status !== 'complete' && s.status !== 'failed'
-    const advRunning = !!s && s.adversarial_status === 'running'
-    if (mainPending || advRunning) {
-      setTimeout(poll, 3000)
+    // Default to the last known session so a transient fetch failure keeps the
+    // running/pending loop alive instead of silently dying.
+    let next: ReviewSession | null = sessionRef.current
+    try {
+      const res = await fetch(`/api/review/status/${sessionId}`)
+      const json = await res.json()
+      if (!activeRef.current) return
+      next = json.session as ReviewSession | null
+      applySession(next)
+    } catch {
+      if (!activeRef.current) return
     }
-  }, [sessionId])
+    const mainPending = !!next && next.status !== 'complete' && next.status !== 'failed'
+    const advRunning = !!next && next.adversarial_status === 'running'
+    if (mainPending || advRunning) {
+      timerRef.current = setTimeout(poll, 3000)
+    }
+  }, [sessionId, applySession])
 
   useEffect(() => {
     activeRef.current = true
     poll()
-    return () => { activeRef.current = false }
+    return () => {
+      activeRef.current = false
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
   }, [poll])
 
   async function startAdversarial() {
     setStarting(true)
     // Optimistic: show "running" immediately; poll() then reconciles with the server.
-    setSession(prev => (prev ? { ...prev, adversarial_status: 'running' } : prev))
+    applySession(sessionRef.current ? { ...sessionRef.current, adversarial_status: 'running' } : sessionRef.current)
     try {
       await fetch('/api/review/adversarial/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId }),
       })
+    } catch {
+      // Network failure: revert so the UI doesn't get stuck on "running".
+      applySession(sessionRef.current ? { ...sessionRef.current, adversarial_status: 'not_started' } : sessionRef.current)
     } finally {
       setStarting(false)
+      // Cancel any in-flight timer before kicking a fresh reconciling poll.
+      if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null }
       poll()
     }
   }
