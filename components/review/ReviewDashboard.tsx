@@ -38,7 +38,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
   }
 
   if (session.status !== 'complete') {
-    const idx = STEPS.indexOf(session.status as any)
+    const idx = STEPS.indexOf(session.status as (typeof STEPS)[number])
     const pct = Math.max(5, Math.round(((idx + 1) / STEPS.length) * 100))
     return (
       <div className="max-w-md">

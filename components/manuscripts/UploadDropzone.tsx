@@ -36,8 +36,8 @@ export function UploadDropzone({ manuscriptId, onError }: {
       if (!start.ok) throw new Error(startJson.error || 'Could not start review')
 
       window.location.href = `/manuscripts/${manuscriptId}/review/${startJson.sessionId}`
-    } catch (e: any) {
-      onError?.(e.message)
+    } catch (e: unknown) {
+      onError?.(e instanceof Error ? e.message : 'Upload failed')
       setBusy(false)
     }
   }

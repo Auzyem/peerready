@@ -19,7 +19,16 @@ export async function runReviewPipeline(sessionId: string) {
 
     if (error || !session) throw new Error('Session not found')
 
-    const draft = session.drafts as any
+    const draft = session.drafts as unknown as {
+      parsed_text?: string
+      manuscripts: {
+        id: string
+        title?: string
+        abstract?: string
+        submission_target?: string
+        user_id: string
+      }
+    }
     const manuscript = draft.manuscripts
 
     const manuscriptText = draft.parsed_text || ''
@@ -79,10 +88,11 @@ export async function runReviewPipeline(sessionId: string) {
       completed_at: new Date().toISOString(),
     }).eq('id', sessionId)
 
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error'
     await supabase.from('review_sessions').update({
       status: 'failed',
-      error_message: err?.message ?? 'Unknown error',
+      error_message: message,
     }).eq('id', sessionId)
     throw err
   }
