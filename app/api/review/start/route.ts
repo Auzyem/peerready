@@ -21,8 +21,17 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Run the pipeline detached from the response lifecycle.
-  waitUntil(runReviewPipeline(session.id))
+  // Run the pipeline detached from the response lifecycle. The promise starts
+  // executing immediately; waitUntil keeps the serverless function alive on
+  // Vercel until it settles. Outside the Vercel runtime (e.g. `next dev`),
+  // waitUntil can throw — the pipeline is already running, so we swallow it.
+  const pipeline = runReviewPipeline(session.id)
+  pipeline.catch((e) => console.error('[review pipeline] failed:', e))
+  try {
+    waitUntil(pipeline)
+  } catch {
+    // Non-Vercel runtime: the floating promise above continues on its own.
+  }
 
   return NextResponse.json({ sessionId: session.id })
 }
