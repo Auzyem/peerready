@@ -1,10 +1,12 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScoreList } from './ScoreList'
 import { AnnotationPanel } from './AnnotationPanel'
+import { AdversarialPanel } from './AdversarialPanel'
 import type { ReviewSession } from '@/lib/types'
 
 const STEPS = ['routing', 'reviewing', 'complete'] as const
@@ -15,21 +17,43 @@ const VERDICT_LABEL: Record<string, string> = {
 
 export function ReviewDashboard({ sessionId }: { sessionId: string }) {
   const [session, setSession] = useState<ReviewSession | null>(null)
+  const [starting, setStarting] = useState(false)
+  const activeRef = useRef(true)
+
+  const poll = useCallback(async () => {
+    const res = await fetch(`/api/review/status/${sessionId}`)
+    const json = await res.json()
+    if (!activeRef.current) return
+    setSession(json.session)
+    const s = json.session as ReviewSession | null
+    const mainPending = !!s && s.status !== 'complete' && s.status !== 'failed'
+    const advRunning = !!s && s.adversarial_status === 'running'
+    if (mainPending || advRunning) {
+      setTimeout(poll, 3000)
+    }
+  }, [sessionId])
 
   useEffect(() => {
-    let active = true
-    async function poll() {
-      const res = await fetch(`/api/review/status/${sessionId}`)
-      const json = await res.json()
-      if (!active) return
-      setSession(json.session)
-      if (json.session && json.session.status !== 'complete' && json.session.status !== 'failed') {
-        setTimeout(poll, 3000)
-      }
-    }
+    activeRef.current = true
     poll()
-    return () => { active = false }
-  }, [sessionId])
+    return () => { activeRef.current = false }
+  }, [poll])
+
+  async function startAdversarial() {
+    setStarting(true)
+    // Optimistic: show "running" immediately; poll() then reconciles with the server.
+    setSession(prev => (prev ? { ...prev, adversarial_status: 'running' } : prev))
+    try {
+      await fetch('/api/review/adversarial/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      })
+    } finally {
+      setStarting(false)
+      poll()
+    }
+  }
 
   if (!session) return <p>Loading review…</p>
 
@@ -49,6 +73,8 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
     )
   }
 
+  const adv = session.adversarial_status ?? 'not_started'
+
   return (
     <div>
       <div className="mb-4 flex items-center gap-3">
@@ -58,6 +84,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="adversarial">Adversarial</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-6 pt-4">
           {session.strength_summary && (
@@ -74,6 +101,40 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
             <h3 className="mb-2 font-medium">Annotations</h3>
             <AnnotationPanel annotations={session.annotations ?? []} />
           </section>
+        </TabsContent>
+        <TabsContent value="adversarial" className="space-y-4 pt-4">
+          {adv === 'not_started' && (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Run a harsher second-pass review that escalates the weaknesses above.
+              </p>
+              <Button onClick={startAdversarial} disabled={starting}>
+                {starting ? 'Starting…' : 'Run adversarial critique'}
+              </Button>
+            </div>
+          )}
+          {adv === 'running' && (
+            <div className="max-w-md">
+              <p className="mb-2">Running adversarial critique…</p>
+              <Progress value={50} />
+            </div>
+          )}
+          {adv === 'complete' && (
+            <div className="space-y-4">
+              {session.adversarial_summary && (
+                <p className="text-sm"><strong>Biggest risk:</strong> {session.adversarial_summary}</p>
+              )}
+              <AdversarialPanel critiques={session.adversarial_critiques ?? []} />
+            </div>
+          )}
+          {adv === 'failed' && (
+            <div className="space-y-3">
+              <p className="text-sm text-red-600">Adversarial critique failed.</p>
+              <Button onClick={startAdversarial} disabled={starting}>
+                {starting ? 'Retrying…' : 'Retry'}
+              </Button>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
