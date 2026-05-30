@@ -64,6 +64,8 @@ export interface ReviewSession {
   weakness_summary?: string
   score_delta?: Record<string, number>
   error_message?: string
+  adversarial_status?: 'not_started' | 'running' | 'complete' | 'failed'
+  adversarial_summary?: string
   created_at: string
   completed_at?: string
   scores?: Score[]
@@ -121,6 +123,18 @@ export interface AdversarialCritique {
   required_fix: string
   section_reference?: string
   resolved: boolean
+}
+
+export interface AdversarialReviewerResult {
+  summary: string
+  critiques: Array<{
+    severity: Severity
+    title: string
+    quoted_passage: string
+    objection: string
+    required_fix: string
+    section_reference: string
+  }>
 }
 
 export interface DisciplineRouterResult {
