@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { GoogleButton } from '@/components/auth/GoogleButton'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -38,6 +39,10 @@ export default function LoginPage() {
             {loading ? 'Logging in…' : 'Log in'}
           </Button>
         </form>
+        <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
+        </div>
+        <GoogleButton />
         <p className="mt-4 text-sm text-muted-foreground">
           No account? <Link href="/signup" className="underline">Sign up</Link>
         </p>
