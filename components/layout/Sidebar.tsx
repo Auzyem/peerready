@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FileText, LayoutDashboard } from 'lucide-react'
+import { FileText, LayoutDashboard, Settings } from 'lucide-react'
 
 export function Sidebar() {
   return (
@@ -11,6 +11,9 @@ export function Sidebar() {
         </Link>
         <Link href="/manuscripts" className="flex items-center gap-2 rounded px-2 py-2 hover:bg-muted">
           <FileText className="h-4 w-4" /> Manuscripts
+        </Link>
+        <Link href="/settings" className="flex items-center gap-2 rounded px-2 py-2 hover:bg-muted">
+          <Settings className="h-4 w-4" /> Settings
         </Link>
       </nav>
     </aside>
