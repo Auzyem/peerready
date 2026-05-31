@@ -28,6 +28,9 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# filled-in vercel import file (template .env.vercel.example stays tracked)
+.env.vercel
+
 # vercel
 .vercel
 
