@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScoreList } from './ScoreList'
+import { ScoreRadar } from './ScoreRadar'
 import { AnnotationPanel } from './AnnotationPanel'
 import { AdversarialPanel } from './AdversarialPanel'
 import { JournalMatchList } from './JournalMatchList'
@@ -170,6 +171,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
           )}
           <section>
             <h3 className="mb-2 font-medium">Scores</h3>
+            <ScoreRadar scores={session.scores ?? []} />
             <ScoreList scores={session.scores ?? []} />
           </section>
           <section>
