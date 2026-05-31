@@ -66,6 +66,7 @@ export interface ReviewSession {
   error_message?: string
   adversarial_status?: 'not_started' | 'running' | 'complete' | 'failed'
   adversarial_summary?: string
+  journal_match_status?: 'not_started' | 'running' | 'complete' | 'failed'
   created_at: string
   completed_at?: string
   scores?: Score[]
@@ -134,6 +135,22 @@ export interface AdversarialReviewerResult {
     objection: string
     required_fix: string
     section_reference: string
+  }>
+}
+
+export interface JournalMatchResult {
+  journals: Array<{
+    rank: number
+    journal_name: string
+    publisher: string
+    fit_score: number
+    acceptance_band: AcceptanceBand
+    impact_factor_range: string
+    avg_decision_days: number
+    key_change_required: string
+    open_access_options: string
+    apc_cost: string
+    rationale: string
   }>
 }
 

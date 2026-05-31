@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScoreList } from './ScoreList'
 import { AnnotationPanel } from './AnnotationPanel'
 import { AdversarialPanel } from './AdversarialPanel'
+import { JournalMatchList } from './JournalMatchList'
 import type { ReviewSession } from '@/lib/types'
 
 const STEPS = ['routing', 'reviewing', 'complete'] as const
@@ -18,6 +19,7 @@ const VERDICT_LABEL: Record<string, string> = {
 export function ReviewDashboard({ sessionId }: { sessionId: string }) {
   const [session, setSession] = useState<ReviewSession | null>(null)
   const [starting, setStarting] = useState(false)
+  const [startingJournals, setStartingJournals] = useState(false)
   const activeRef = useRef(true)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Mirrors `session` so the poll loop can decide whether to keep polling even
@@ -44,7 +46,8 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
     }
     const mainPending = !!next && next.status !== 'complete' && next.status !== 'failed'
     const advRunning = !!next && next.adversarial_status === 'running'
-    if (mainPending || advRunning) {
+    const jmRunning = !!next && next.journal_match_status === 'running'
+    if (mainPending || advRunning || jmRunning) {
       timerRef.current = setTimeout(poll, 3000)
     }
   }, [sessionId, applySession])
@@ -79,6 +82,26 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
     }
   }
 
+  async function startJournals() {
+    setStartingJournals(true)
+    // Optimistic: show "running" immediately; poll() then reconciles with the server.
+    applySession(sessionRef.current ? { ...sessionRef.current, journal_match_status: 'running' } : sessionRef.current)
+    try {
+      await fetch('/api/review/journals/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      })
+    } catch {
+      // Network failure: revert so the UI doesn't get stuck on "running".
+      applySession(sessionRef.current ? { ...sessionRef.current, journal_match_status: 'not_started' } : sessionRef.current)
+    } finally {
+      setStartingJournals(false)
+      if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null }
+      poll()
+    }
+  }
+
   if (!session) return <p>Loading review…</p>
 
   if (session.status === 'failed') {
@@ -98,6 +121,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
   }
 
   const adv = session.adversarial_status ?? 'not_started'
+  const jm = session.journal_match_status ?? 'not_started'
 
   return (
     <div>
@@ -109,6 +133,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="adversarial">Adversarial</TabsTrigger>
+          <TabsTrigger value="journals">Journals</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-6 pt-4">
           {session.strength_summary && (
@@ -156,6 +181,36 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
               <p className="text-sm text-red-600">Adversarial critique failed.</p>
               <Button onClick={startAdversarial} disabled={starting}>
                 {starting ? 'Retrying…' : 'Retry'}
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+        <TabsContent value="journals" className="space-y-4 pt-4">
+          {jm === 'not_started' && (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Get a ranked list of journals to target, with acceptance odds, timelines, and the
+                key change each one needs — tailored to this review.
+              </p>
+              <Button onClick={startJournals} disabled={startingJournals}>
+                {startingJournals ? 'Starting…' : 'Find journal matches'}
+              </Button>
+            </div>
+          )}
+          {jm === 'running' && (
+            <div className="max-w-md">
+              <p className="mb-2">Finding journal matches…</p>
+              <Progress value={50} />
+            </div>
+          )}
+          {jm === 'complete' && (
+            <JournalMatchList matches={session.journal_matches ?? []} />
+          )}
+          {jm === 'failed' && (
+            <div className="space-y-3">
+              <p className="text-sm text-red-600">Journal matching failed.</p>
+              <Button onClick={startJournals} disabled={startingJournals}>
+                {startingJournals ? 'Retrying…' : 'Retry'}
               </Button>
             </div>
           )}
