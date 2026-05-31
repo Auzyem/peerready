@@ -128,6 +128,9 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
       <div className="mb-4 flex items-center gap-3">
         <Badge>{VERDICT_LABEL[session.verdict ?? ''] ?? session.verdict}</Badge>
         <span className="text-lg font-semibold">{session.overall_score ?? 0} / 80</span>
+        <Button asChild variant="outline" className="ml-auto">
+          <a href={`/api/export/${sessionId}`} download>Download .xlsx</a>
+        </Button>
       </div>
       <Tabs defaultValue="overview">
         <TabsList>
