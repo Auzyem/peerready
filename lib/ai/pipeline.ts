@@ -1,8 +1,29 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { runDisciplineRouter } from './prompts/disciplineRouter'
 import { runDeepReviewer } from './prompts/deepReviewer'
-import type { ReviewStatus } from '@/lib/types'
+import type { ReviewStatus, ReviewerPersona } from '@/lib/types'
 
+// Below this routing confidence we pause for the user to confirm/override the
+// detected field before spending tokens on a possibly-misrouted deep review (#6).
+export const CONFIDENCE_THRESHOLD = 0.7
+
+type DraftWithManuscript = {
+  parsed_text?: string
+  manuscripts: {
+    id: string
+    title?: string
+    abstract?: string
+    field?: string
+    submission_target?: string
+    user_id: string
+  }
+}
+
+/**
+ * Stage 1: discipline routing. Persists the detected metadata and persona.
+ * If the router is confident, continues straight into the deep review; if not,
+ * parks the session at 'awaiting_confirmation' for the user to confirm the field.
+ */
 export async function runReviewPipeline(sessionId: string) {
   const supabase = createAdminClient()
 
@@ -19,23 +40,11 @@ export async function runReviewPipeline(sessionId: string) {
 
     if (error || !session) throw new Error('Session not found')
 
-    const draft = session.drafts as unknown as {
-      parsed_text?: string
-      manuscripts: {
-        id: string
-        title?: string
-        abstract?: string
-        submission_target?: string
-        user_id: string
-      }
-    }
+    const draft = session.drafts as unknown as DraftWithManuscript
     const manuscript = draft.manuscripts
-
-    const manuscriptText = draft.parsed_text || ''
     const title = manuscript.title || ''
     const abstract = manuscript.abstract || ''
 
-    // Stage 1: discipline routing
     await updateStatus('routing')
     const routing = await runDisciplineRouter(title, abstract)
 
@@ -47,14 +56,55 @@ export async function runReviewPipeline(sessionId: string) {
 
     await supabase.from('review_sessions').update({
       reviewer_persona: routing.persona,
+      routing_confidence: routing.confidence,
     }).eq('id', sessionId)
 
-    // Stage 2: deep review
-    await updateStatus('reviewing')
+    if (routing.confidence < CONFIDENCE_THRESHOLD) {
+      // Pause for human confirmation; the confirm route resumes via runDeepReviewStage.
+      await updateStatus('awaiting_confirmation')
+      return
+    }
+
+    await runDeepReviewStage(sessionId)
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    await supabase.from('review_sessions').update({
+      status: 'failed',
+      error_message: message,
+    }).eq('id', sessionId)
+    throw err
+  }
+}
+
+/**
+ * Stage 2: the deep review. Self-contained (reloads its own inputs) so it can be
+ * triggered both by the pipeline (high confidence) and by the confirm route
+ * (after the user confirms the field on a low-confidence routing).
+ */
+export async function runDeepReviewStage(sessionId: string) {
+  const supabase = createAdminClient()
+
+  try {
+    await supabase.from('review_sessions').update({ status: 'reviewing' }).eq('id', sessionId)
+
+    const { data: session, error } = await supabase
+      .from('review_sessions')
+      .select('*, drafts(*, manuscripts(*))')
+      .eq('id', sessionId)
+      .single()
+
+    if (error || !session) throw new Error('Session not found')
+
+    const draft = session.drafts as unknown as DraftWithManuscript
+    const manuscript = draft.manuscripts
+    const manuscriptText = draft.parsed_text || ''
+    const persona = (session.reviewer_persona as ReviewerPersona) || 'social_science_quant'
+    const field = manuscript.field || 'this field'
+
     const review = await runDeepReviewer(
       manuscriptText,
-      routing.persona,
-      routing.field,
+      persona,
+      field,
       manuscript.submission_target
     )
 
@@ -87,7 +137,6 @@ export async function runReviewPipeline(sessionId: string) {
       status: 'complete',
       completed_at: new Date().toISOString(),
     }).eq('id', sessionId)
-
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     await supabase.from('review_sessions').update({

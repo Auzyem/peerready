@@ -1,6 +1,6 @@
 export type CareerStage = 'phd_student' | 'postdoc' | 'junior_faculty' | 'senior_faculty' | 'independent'
 export type DocType = 'journal_article' | 'thesis_chapter' | 'conference_paper' | 'grant_proposal' | 'systematic_review'
-export type ReviewStatus = 'queued' | 'routing' | 'reviewing' | 'adversarial' | 'matching' | 'comparing' | 'complete' | 'failed'
+export type ReviewStatus = 'queued' | 'routing' | 'awaiting_confirmation' | 'reviewing' | 'adversarial' | 'matching' | 'comparing' | 'complete' | 'failed'
 export type Verdict = 'accept' | 'minor_revision' | 'major_revision' | 'reject'
 export type Severity = 'critical' | 'major' | 'minor'
 export type AcceptanceBand = 'high' | 'medium' | 'low'
@@ -58,6 +58,7 @@ export interface ReviewSession {
   status: ReviewStatus
   reviewer_persona?: ReviewerPersona
   mode: 'standard' | 'adversarial' | 'journal_focused'
+  routing_confidence?: number
   overall_score?: number
   verdict?: Verdict
   strength_summary?: string

@@ -8,7 +8,8 @@ import { ScoreList } from './ScoreList'
 import { AnnotationPanel } from './AnnotationPanel'
 import { AdversarialPanel } from './AdversarialPanel'
 import { JournalMatchList } from './JournalMatchList'
-import type { ReviewSession } from '@/lib/types'
+import { FieldConfirm } from './FieldConfirm'
+import type { ReviewSession, ReviewerPersona } from '@/lib/types'
 
 const STEPS = ['routing', 'reviewing', 'complete'] as const
 const VERDICT_LABEL: Record<string, string> = {
@@ -44,7 +45,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
     } catch {
       if (!activeRef.current) return
     }
-    const mainPending = !!next && next.status !== 'complete' && next.status !== 'failed'
+    const mainPending = !!next && next.status !== 'complete' && next.status !== 'failed' && next.status !== 'awaiting_confirmation'
     const advRunning = !!next && next.adversarial_status === 'running'
     const jmRunning = !!next && next.journal_match_status === 'running'
     if (mainPending || advRunning || jmRunning) {
@@ -106,6 +107,26 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
 
   if (session.status === 'failed') {
     return <p className="text-red-600">Review failed: {session.error_message}</p>
+  }
+
+  if (session.status === 'awaiting_confirmation') {
+    const manuscript = (session as unknown as {
+      drafts?: { manuscripts?: { field?: string } }
+    }).drafts?.manuscripts
+    return (
+      <FieldConfirm
+        sessionId={sessionId}
+        detectedField={manuscript?.field}
+        detectedPersona={session.reviewer_persona as ReviewerPersona | undefined}
+        confidence={session.routing_confidence}
+        onConfirmed={() => {
+          if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null }
+          // Optimistically advance so polling resumes immediately.
+          applySession({ ...session, status: 'reviewing' })
+          poll()
+        }}
+      />
+    )
   }
 
   if (session.status !== 'complete') {

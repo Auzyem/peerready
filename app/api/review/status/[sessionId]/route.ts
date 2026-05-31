@@ -16,7 +16,8 @@ export async function GET(
       scores(*),
       annotations(*),
       journal_matches(*),
-      adversarial_critiques(*)
+      adversarial_critiques(*),
+      drafts(manuscripts(field, subfield, doc_type))
     `)
     .eq('id', params.sessionId)
     .single()
