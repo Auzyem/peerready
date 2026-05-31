@@ -290,6 +290,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
                 {detected.rationale}
               </p>
               <select
+                aria-label="Reporting guideline"
                 className="rounded-md border px-3 py-2 text-sm"
                 value={activeGuideline}
                 onChange={e => setSelectedGuideline(e.target.value as ReportingGuidelineId)}
