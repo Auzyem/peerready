@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { waitUntil } from '@vercel/functions'
 import { createClient } from '@/lib/supabase/server'
 import { runReviewPipeline } from '@/lib/ai/pipeline'
+import { RATE_LIMITS, ACTIVE_REVIEW_STATUSES, hourAgoIso } from '@/lib/rateLimit'
 
 export const maxDuration = 300
 
@@ -12,6 +13,31 @@ export async function POST(request: NextRequest) {
 
   const { draftId, mode = 'standard' } = await request.json()
   if (!draftId) return NextResponse.json({ error: 'draftId required' }, { status: 400 })
+
+  // Rate limit (RLS scopes these counts to the current user):
+  // 1) only one actively-running review at a time
+  const { data: active } = await supabase
+    .from('review_sessions')
+    .select('id')
+    .in('status', ACTIVE_REVIEW_STATUSES as unknown as string[])
+    .limit(1)
+  if (active && active.length > 0) {
+    return NextResponse.json(
+      { error: 'You already have a review in progress. Please wait for it to finish.' },
+      { status: 429 }
+    )
+  }
+  // 2) a rolling hourly cap
+  const { count } = await supabase
+    .from('review_sessions')
+    .select('*', { count: 'exact', head: true })
+    .gte('created_at', hourAgoIso())
+  if ((count ?? 0) >= RATE_LIMITS.reviewsPerHour) {
+    return NextResponse.json(
+      { error: 'Hourly review limit reached. Please try again later.' },
+      { status: 429 }
+    )
+  }
 
   const { data: session, error } = await supabase
     .from('review_sessions')

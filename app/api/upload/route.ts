@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { parsePDF } from '@/lib/parsers/pdfParser'
 import { parseDOCX } from '@/lib/parsers/docxParser'
+import { RATE_LIMITS, hourAgoIso } from '@/lib/rateLimit'
 
 const MAX_BYTES = 10 * 1024 * 1024
 
@@ -9,6 +10,18 @@ export async function POST(request: NextRequest) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Rolling hourly upload cap (RLS scopes this count to the current user).
+  const { count } = await supabase
+    .from('drafts')
+    .select('*', { count: 'exact', head: true })
+    .gte('created_at', hourAgoIso())
+  if ((count ?? 0) >= RATE_LIMITS.uploadsPerHour) {
+    return NextResponse.json(
+      { error: 'Hourly upload limit reached. Please try again later.' },
+      { status: 429 }
+    )
+  }
 
   const formData = await request.formData()
   const file = formData.get('file') as File | null
