@@ -8,6 +8,7 @@ import { ScoreList } from './ScoreList'
 import { AnnotationPanel } from './AnnotationPanel'
 import { AdversarialPanel } from './AdversarialPanel'
 import { JournalMatchList } from './JournalMatchList'
+import { ProgressComparator } from './ProgressComparator'
 import { FieldConfirm } from './FieldConfirm'
 import type { ReviewSession, ReviewerPersona } from '@/lib/types'
 
@@ -158,6 +159,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="adversarial">Adversarial</TabsTrigger>
           <TabsTrigger value="journals">Journals</TabsTrigger>
+          {session.score_delta && <TabsTrigger value="progress">Progress</TabsTrigger>}
         </TabsList>
         <TabsContent value="overview" className="space-y-6 pt-4">
           {session.strength_summary && (
@@ -239,6 +241,11 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
             </div>
           )}
         </TabsContent>
+        {session.score_delta && (
+          <TabsContent value="progress" className="pt-4">
+            <ProgressComparator delta={session.score_delta} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )

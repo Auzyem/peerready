@@ -1,7 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { runDisciplineRouter } from './prompts/disciplineRouter'
 import { runDeepReviewer } from './prompts/deepReviewer'
-import type { ReviewStatus, ReviewerPersona } from '@/lib/types'
+import { runProgressComparator } from './prompts/progressComparator'
+import type { ReviewStatus, ReviewerPersona, Score, Annotation } from '@/lib/types'
 
 // Below this routing confidence we pause for the user to confirm/override the
 // detected field before spending tokens on a possibly-misrouted deep review (#6).
@@ -9,6 +10,7 @@ export const CONFIDENCE_THRESHOLD = 0.7
 
 type DraftWithManuscript = {
   parsed_text?: string
+  version_number?: number
   manuscripts: {
     id: string
     title?: string
@@ -137,6 +139,13 @@ export async function runDeepReviewStage(sessionId: string) {
       status: 'complete',
       completed_at: new Date().toISOString(),
     }).eq('id', sessionId)
+
+    // Best-effort draft-to-draft comparison; never fails the (already saved) review.
+    try {
+      await runProgressComparison(sessionId, manuscript.id, draft.version_number)
+    } catch (e) {
+      console.error('[progress comparison] failed:', e)
+    }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     await supabase.from('review_sessions').update({
@@ -145,4 +154,50 @@ export async function runDeepReviewStage(sessionId: string) {
     }).eq('id', sessionId)
     throw err
   }
+}
+
+/**
+ * If an earlier draft of the same manuscript has a completed review, compare it
+ * to this session and store the result in score_delta. Powers the Progress tab (#2).
+ */
+async function runProgressComparison(
+  sessionId: string,
+  manuscriptId: string,
+  currentVersion?: number
+) {
+  if (typeof currentVersion !== 'number') return
+  const supabase = createAdminClient()
+
+  const { data: priorDrafts } = await supabase
+    .from('drafts')
+    .select('id')
+    .eq('manuscript_id', manuscriptId)
+    .lt('version_number', currentVersion)
+    .order('version_number', { ascending: false })
+    .limit(1)
+  const priorDraftId = priorDrafts?.[0]?.id
+  if (!priorDraftId) return
+
+  const { data: priorSessions } = await supabase
+    .from('review_sessions')
+    .select('id, scores(*), annotations(*)')
+    .eq('draft_id', priorDraftId)
+    .eq('status', 'complete')
+    .order('completed_at', { ascending: false })
+    .limit(1)
+  const prior = priorSessions?.[0]
+  if (!prior) return
+
+  const { data: currentScores } = await supabase
+    .from('scores')
+    .select('*')
+    .eq('session_id', sessionId)
+
+  const result = await runProgressComparator({
+    v1Scores: (prior.scores as Score[]) ?? [],
+    v2Scores: (currentScores as Score[]) ?? [],
+    v1Annotations: (prior.annotations as Annotation[]) ?? [],
+  })
+
+  await supabase.from('review_sessions').update({ score_delta: result }).eq('id', sessionId)
 }

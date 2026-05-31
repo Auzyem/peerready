@@ -63,7 +63,7 @@ export interface ReviewSession {
   verdict?: Verdict
   strength_summary?: string
   weakness_summary?: string
-  score_delta?: Record<string, number>
+  score_delta?: ProgressComparatorResult
   error_message?: string
   adversarial_status?: 'not_started' | 'running' | 'complete' | 'failed'
   adversarial_summary?: string
@@ -153,6 +153,24 @@ export interface JournalMatchResult {
     apc_cost: string
     rationale: string
   }>
+}
+
+export interface ProgressComparatorResult {
+  dimension_changes: Array<{
+    dimension: ScoreDimension
+    v1_score: number
+    v2_score: number
+    delta: number
+    direction: 'improved' | 'regressed' | 'unchanged'
+    cause?: string
+    comment_addressed: 'fully' | 'partially' | 'not_addressed'
+  }>
+  overall_summary: string
+  top_improvements: string[]
+  remaining_issues: string[]
+  readiness: 'not_ready' | 'minor_fixes' | 'submission_ready'
+  recommended_action: string
+  new_problems_introduced: string[]
 }
 
 export interface DisciplineRouterResult {
