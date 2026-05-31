@@ -1,13 +1,183 @@
-import { Button } from "@/components/ui/button";
+import Link from 'next/link'
+import {
+  Upload, Compass, ShieldAlert, Library, FileSpreadsheet, TrendingUp,
+  ArrowRight, Mail, Check,
+} from 'lucide-react'
+import { ScoreRadar } from '@/components/review/ScoreRadar'
+import type { Score } from '@/lib/types'
+
+const DEMO_SCORES: Score[] = [
+  { id: '1', session_id: 'd', dimension: 'originality', score: 8, max_score: 10 },
+  { id: '2', session_id: 'd', dimension: 'significance', score: 7, max_score: 10 },
+  { id: '3', session_id: 'd', dimension: 'methodology', score: 6, max_score: 10 },
+  { id: '4', session_id: 'd', dimension: 'evidence_quality', score: 7, max_score: 10 },
+  { id: '5', session_id: 'd', dimension: 'literature_engagement', score: 8, max_score: 10 },
+  { id: '6', session_id: 'd', dimension: 'internal_logic', score: 6, max_score: 10 },
+  { id: '7', session_id: 'd', dimension: 'presentation_clarity', score: 9, max_score: 10 },
+  { id: '8', session_id: 'd', dimension: 'ethical_compliance', score: 8, max_score: 10 },
+]
+
+const STEPS = [
+  { icon: Upload, title: 'Upload your manuscript', body: 'Drop in a PDF or DOCX. We parse the full text and extract sections automatically.' },
+  { icon: Compass, title: 'Discipline routing', body: 'Claude identifies the field, sub-field, and the most appropriate reviewer persona for your paper.' },
+  { icon: ShieldAlert, title: 'Deep + adversarial review', body: 'A rigorous senior-reviewer pass scores eight dimensions; an optional "Reviewer 2" escalates the weaknesses.' },
+  { icon: Library, title: 'Target the right journal', body: 'Get ranked journal recommendations with acceptance odds, timelines, and the key change each one needs.' },
+]
+
+const FEATURES = [
+  { icon: Check, title: 'Eight scored dimensions', body: 'Originality, significance, methodology, evidence, literature, logic, clarity, and ethics — each with rationale and fixes.' },
+  { icon: ShieldAlert, title: 'Adversarial critique', body: 'The harsh-but-fair objections a reviewer could make, each with a quoted passage and a concrete required fix.' },
+  { icon: Library, title: 'Journal matching', body: 'Five to eight venues ranked by fit, with impact factor, decision time, open-access options, and APC.' },
+  { icon: TrendingUp, title: 'Revision tracking', body: 'Re-upload a revised draft and see exactly which scores improved and which reviewer comments you addressed.' },
+  { icon: FileSpreadsheet, title: 'Export to Excel', body: 'A reviewer-response matrix you can fill in: scores, annotations, critiques, and journal targets across four sheets.' },
+  { icon: Compass, title: 'Built for first submissions', body: 'Designed for PhD candidates and early-career researchers submitting to academic journals.' },
+]
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-24">
-      <h1 className="text-4xl font-bold">PeerReady</h1>
-      <p className="text-muted-foreground">
-        AI-powered manuscript peer review.
-      </p>
-      <Button>Get started</Button>
+    <main className="min-h-screen bg-white text-slate-900">
+      {/* Nav */}
+      <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <span className="text-lg font-bold">PeerReady</span>
+          <nav className="hidden items-center gap-6 text-sm text-slate-600 sm:flex">
+            <a href="#how" className="hover:text-slate-900">How it works</a>
+            <a href="#features" className="hover:text-slate-900">Features</a>
+            <a href="#contact" className="hover:text-slate-900">Contact</a>
+          </nav>
+          <div className="flex items-center gap-3 text-sm">
+            <Link href="/login" className="text-slate-600 hover:text-slate-900">Log in</Link>
+            <Link href="/signup" className="rounded-md bg-slate-900 px-3 py-1.5 font-medium text-white hover:bg-slate-700">
+              Sign up
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute -top-24 right-0 h-96 w-96 rounded-full bg-indigo-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-sky-200/40 blur-3xl" />
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 md:grid-cols-2">
+          <div>
+            <span className="inline-block rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+              AI peer review for academic manuscripts
+            </span>
+            <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl">
+              Know what reviewers will say — before you submit.
+            </h1>
+            <p className="mt-4 text-lg text-slate-600">
+              Upload your paper and PeerReady runs a rigorous, discipline-aware review: eight scored
+              dimensions, inline annotations, an adversarial &ldquo;Reviewer 2&rdquo; pass, and a
+              ranked shortlist of journals to target.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-5 py-3 font-medium text-white shadow hover:bg-indigo-700"
+              >
+                Get started <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-2 rounded-md border px-5 py-3 font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Create an account
+              </Link>
+            </div>
+            <p className="mt-4 text-sm text-slate-500">No credit card required · PDF &amp; DOCX supported</p>
+          </div>
+
+          {/* Hero visual: a product-style card using the real radar chart */}
+          <div className="rounded-2xl border bg-white p-6 shadow-xl">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                Minor revision
+              </span>
+              <span className="text-lg font-semibold">59 / 80</span>
+            </div>
+            <ScoreRadar scores={DEMO_SCORES} />
+            <p className="mt-2 text-center text-xs text-slate-500">
+              Eight quality dimensions, scored 1–10
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how" className="border-t bg-slate-50">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <h2 className="text-center text-3xl font-bold">How it works</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-center text-slate-600">
+            From upload to submission-ready in minutes — four automated stages.
+          </p>
+          <ol className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((s, i) => (
+              <li key={s.title} className="rounded-xl border bg-white p-6 shadow-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+                  <s.icon className="h-5 w-5" />
+                </div>
+                <div className="mt-4 text-xs font-semibold text-indigo-600">Step {i + 1}</div>
+                <h3 className="mt-1 font-semibold">{s.title}</h3>
+                <p className="mt-1 text-sm text-slate-600">{s.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="mx-auto max-w-6xl px-6 py-20">
+        <h2 className="text-center text-3xl font-bold">Everything in one review</h2>
+        <p className="mx-auto mt-2 max-w-2xl text-center text-slate-600">
+          A complete reviewer&rsquo;s-eye view of your manuscript.
+        </p>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(f => (
+            <div key={f.title} className="rounded-xl border p-6">
+              <f.icon className="h-6 w-6 text-indigo-600" />
+              <h3 className="mt-3 font-semibold">{f.title}</h3>
+              <p className="mt-1 text-sm text-slate-600">{f.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact / CTA */}
+      <section id="contact" className="border-t bg-slate-900 text-white">
+        <div className="mx-auto max-w-6xl px-6 py-20 text-center">
+          <h2 className="text-3xl font-bold">Ready to strengthen your next submission?</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-slate-300">
+            Create a free account and run your first review today. Questions, feedback, or
+            institutional access? We&rsquo;d love to hear from you.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/signup"
+              className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700"
+            >
+              Get started free <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a
+              href="mailto:hello@peerready.app"
+              className="inline-flex items-center gap-2 rounded-md border border-white/30 px-5 py-3 font-medium text-white hover:bg-white/10"
+            >
+              <Mail className="h-4 w-4" /> Contact us
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-8 text-sm text-slate-500 sm:flex-row">
+          <span>© {new Date().getFullYear()} PeerReady</span>
+          <div className="flex gap-4">
+            <Link href="/login" className="hover:text-slate-900">Log in</Link>
+            <Link href="/signup" className="hover:text-slate-900">Sign up</Link>
+            <a href="mailto:hello@peerready.app" className="hover:text-slate-900">Contact</a>
+          </div>
+        </div>
+      </footer>
     </main>
-  );
+  )
 }
