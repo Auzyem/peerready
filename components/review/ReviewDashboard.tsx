@@ -12,6 +12,7 @@ import { JournalMatchList } from './JournalMatchList'
 import { ProgressComparator } from './ProgressComparator'
 import { FieldConfirm } from './FieldConfirm'
 import { ReportingChecklist } from './ReportingChecklist'
+import { PdfReportModal } from './PdfReportModal'
 import { detectGuideline } from '@/lib/reporting/detect'
 import { GUIDELINES, GUIDELINE_IDS, type ReportingGuidelineId } from '@/lib/reporting/guidelines'
 import type { ReviewSession, ReviewerPersona } from '@/lib/types'
@@ -28,6 +29,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
   const [startingJournals, setStartingJournals] = useState(false)
   const [startingReporting, setStartingReporting] = useState(false)
   const [selectedGuideline, setSelectedGuideline] = useState<ReportingGuidelineId | null>(null)
+  const [showPdf, setShowPdf] = useState(false)
   const activeRef = useRef(true)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Mirrors `session` so the poll loop can decide whether to keep polling even
@@ -189,10 +191,23 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
       <div className="mb-4 flex items-center gap-3">
         <Badge>{VERDICT_LABEL[session.verdict ?? ''] ?? session.verdict}</Badge>
         <span className="text-lg font-semibold">{session.overall_score ?? 0} / 80</span>
-        <Button asChild variant="outline" className="ml-auto">
+        <Button variant="outline" className="ml-auto" onClick={() => setShowPdf(true)}>
+          PDF report
+        </Button>
+        <Button asChild variant="outline">
           <a href={`/api/export/${sessionId}`} download>Download .xlsx</a>
         </Button>
       </div>
+      {showPdf && (
+        <PdfReportModal
+          sessionId={sessionId}
+          manuscriptTitle={
+            (session as unknown as { drafts?: { manuscripts?: { title?: string } } })
+              .drafts?.manuscripts?.title ?? 'Review'
+          }
+          onClose={() => setShowPdf(false)}
+        />
+      )}
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
