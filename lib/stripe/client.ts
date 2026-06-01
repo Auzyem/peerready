@@ -2,7 +2,10 @@ import Stripe from 'stripe'
 
 // apiVersion omitted on purpose — let the SDK use its pinned default so we don't
 // fight a literal-type mismatch on build. Configure the version in the Stripe dashboard.
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '', {
+// The placeholder fallback keeps the Stripe constructor (which throws on an empty key)
+// from breaking `next build` when STRIPE_SECRET_KEY isn't set yet — real Stripe calls
+// still require a real key at runtime.
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_placeholder_build_only', {
   typescript: true,
 })
 
