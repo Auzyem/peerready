@@ -20,6 +20,7 @@ export async function GET(
       annotations(*),
       adversarial_critiques(*),
       journal_matches(*),
+      reporting_checklist_items(*),
       drafts(manuscripts(title))
     `)
     .eq('id', params.sessionId)

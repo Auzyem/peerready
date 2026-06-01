@@ -1,14 +1,16 @@
 import * as XLSX from 'xlsx'
+import { sortByGuidelineOrder } from '@/lib/reporting/order'
 import type { ReviewSession } from '@/lib/types'
 
 type Cell = string | number | null
 
 /**
  * Build a multi-sheet XLSX "reviewer response matrix" for a completed review:
- *   1. Score Summary    — the 8 dimensions, rationale, improvements, overall + verdict
- *   2. Response Matrix  — annotations with a blank column for the author's response
- *   3. Adversarial Review — escalated critiques with a status column
- *   4. Journal Targets  — ranked journal recommendations
+ *   1. Score Summary       — the 8 dimensions, rationale, improvements, overall + verdict
+ *   2. Response Matrix     — annotations with a blank column for the author's response
+ *   3. Adversarial Review  — escalated critiques with a status column
+ *   4. Journal Targets     — ranked journal recommendations
+ *   5. Reporting Checklist — per-item status from the applicable reporting guideline
  * Pure and synchronous so it's trivially testable (read the buffer back with XLSX.read).
  */
 export function generateReviewMatrix(session: ReviewSession, manuscriptTitle?: string): Buffer {
@@ -85,6 +87,20 @@ export function generateReviewMatrix(session: ReviewSession, manuscriptTitle?: s
       ]),
   ]
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(journalData), 'Journal Targets')
+
+  // Sheet 5 — Reporting checklist
+  const reportingData: Cell[][] = [
+    ['Code', 'Section', 'Requirement', 'Status', 'Evidence', 'Fix'],
+    ...sortByGuidelineOrder(session.reporting_checklist_items ?? []).map((r): Cell[] => [
+      r.item_code,
+      r.section ?? '',
+      r.requirement ?? '',
+      r.status,
+      r.evidence ?? '',
+      r.fix ?? '',
+    ]),
+  ]
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(reportingData), 'Reporting Checklist')
 
   return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer
 }

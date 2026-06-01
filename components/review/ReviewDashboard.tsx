@@ -11,6 +11,9 @@ import { AdversarialPanel } from './AdversarialPanel'
 import { JournalMatchList } from './JournalMatchList'
 import { ProgressComparator } from './ProgressComparator'
 import { FieldConfirm } from './FieldConfirm'
+import { ReportingChecklist } from './ReportingChecklist'
+import { detectGuideline } from '@/lib/reporting/detect'
+import { GUIDELINES, GUIDELINE_IDS, type ReportingGuidelineId } from '@/lib/reporting/guidelines'
 import type { ReviewSession, ReviewerPersona } from '@/lib/types'
 
 const STEPS = ['routing', 'reviewing', 'complete'] as const
@@ -23,6 +26,8 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
   const [session, setSession] = useState<ReviewSession | null>(null)
   const [starting, setStarting] = useState(false)
   const [startingJournals, setStartingJournals] = useState(false)
+  const [startingReporting, setStartingReporting] = useState(false)
+  const [selectedGuideline, setSelectedGuideline] = useState<ReportingGuidelineId | null>(null)
   const activeRef = useRef(true)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Mirrors `session` so the poll loop can decide whether to keep polling even
@@ -50,7 +55,8 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
     const mainPending = !!next && next.status !== 'complete' && next.status !== 'failed' && next.status !== 'awaiting_confirmation'
     const advRunning = !!next && next.adversarial_status === 'running'
     const jmRunning = !!next && next.journal_match_status === 'running'
-    if (mainPending || advRunning || jmRunning) {
+    const rcRunning = !!next && next.reporting_check_status === 'running'
+    if (mainPending || advRunning || jmRunning || rcRunning) {
       timerRef.current = setTimeout(poll, 3000)
     }
   }, [sessionId, applySession])
@@ -105,6 +111,26 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
     }
   }
 
+  async function startReporting(guidelineId: ReportingGuidelineId) {
+    setStartingReporting(true)
+    // Optimistic: show "running" immediately; poll() then reconciles with the server.
+    applySession(sessionRef.current ? { ...sessionRef.current, reporting_check_status: 'running' } : sessionRef.current)
+    try {
+      await fetch('/api/review/reporting/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, guidelineId }),
+      })
+    } catch {
+      // Network failure: revert so the UI doesn't get stuck on "running".
+      applySession(sessionRef.current ? { ...sessionRef.current, reporting_check_status: 'not_started' } : sessionRef.current)
+    } finally {
+      setStartingReporting(false)
+      if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null }
+      poll()
+    }
+  }
+
   if (!session) return <p>Loading review…</p>
 
   if (session.status === 'failed') {
@@ -145,6 +171,18 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
 
   const adv = session.adversarial_status ?? 'not_started'
   const jm = session.journal_match_status ?? 'not_started'
+  const rc = session.reporting_check_status ?? 'not_started'
+  const rcManuscript = (session as unknown as {
+    drafts?: { manuscripts?: { doc_type?: string; title?: string; abstract?: string } }
+  }).drafts?.manuscripts
+  const detected = detectGuideline({
+    docType: rcManuscript?.doc_type,
+    persona: session.reviewer_persona,
+    title: rcManuscript?.title,
+    abstract: rcManuscript?.abstract,
+  })
+  const activeGuideline: ReportingGuidelineId =
+    selectedGuideline ?? (session.reporting_guideline_id as ReportingGuidelineId) ?? detected.id
 
   return (
     <div>
@@ -160,6 +198,7 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="adversarial">Adversarial</TabsTrigger>
           <TabsTrigger value="journals">Journals</TabsTrigger>
+          <TabsTrigger value="reporting">Reporting</TabsTrigger>
           {session.score_delta && <TabsTrigger value="progress">Progress</TabsTrigger>}
         </TabsList>
         <TabsContent value="overview" className="space-y-6 pt-4">
@@ -239,6 +278,60 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
               <p className="text-sm text-red-600">Journal matching failed.</p>
               <Button onClick={startJournals} disabled={startingJournals}>
                 {startingJournals ? 'Retrying…' : 'Retry'}
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+        <TabsContent value="reporting" className="space-y-4 pt-4">
+          {rc === 'not_started' && (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Check this manuscript against a reporting-guideline checklist. Detected:{' '}
+                {detected.rationale}
+              </p>
+              <select
+                aria-label="Reporting guideline"
+                className="rounded-md border px-3 py-2 text-sm"
+                value={activeGuideline}
+                onChange={e => setSelectedGuideline(e.target.value as ReportingGuidelineId)}
+              >
+                {GUIDELINE_IDS.map(id => (
+                  <option key={id} value={id}>{GUIDELINES[id].name}</option>
+                ))}
+              </select>
+              <div>
+                <Button onClick={() => startReporting(activeGuideline)} disabled={startingReporting}>
+                  {startingReporting ? 'Starting…' : 'Run compliance check'}
+                </Button>
+              </div>
+            </div>
+          )}
+          {rc === 'running' && (
+            <div className="max-w-md">
+              <p className="mb-2">Running compliance check…</p>
+              <Progress value={50} />
+            </div>
+          )}
+          {rc === 'complete' && (
+            <div className="space-y-4">
+              {session.reporting_summary && (
+                <p className="text-sm"><strong>Summary:</strong> {session.reporting_summary}</p>
+              )}
+              <ReportingChecklist
+                items={session.reporting_checklist_items ?? []}
+                guidelineName={
+                  session.reporting_guideline_id
+                    ? GUIDELINES[session.reporting_guideline_id as ReportingGuidelineId]?.name
+                    : undefined
+                }
+              />
+            </div>
+          )}
+          {rc === 'failed' && (
+            <div className="space-y-3">
+              <p className="text-sm text-red-600">Compliance check failed.</p>
+              <Button onClick={() => startReporting(activeGuideline)} disabled={startingReporting}>
+                {startingReporting ? 'Retrying…' : 'Retry'}
               </Button>
             </div>
           )}

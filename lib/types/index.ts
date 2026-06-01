@@ -68,11 +68,15 @@ export interface ReviewSession {
   adversarial_status?: 'not_started' | 'running' | 'complete' | 'failed'
   adversarial_summary?: string
   journal_match_status?: 'not_started' | 'running' | 'complete' | 'failed'
+  reporting_check_status?: 'not_started' | 'running' | 'complete' | 'failed'
+  reporting_guideline_id?: string
+  reporting_summary?: string
   created_at: string
   completed_at?: string
   scores?: Score[]
   annotations?: Annotation[]
   journal_matches?: JournalMatch[]
+  reporting_checklist_items?: ReportingChecklistItem[]
   adversarial_critiques?: AdversarialCritique[]
 }
 
@@ -193,5 +197,32 @@ export interface DeepReviewerResult {
     severity: Severity
     comment: string
     suggestion: string
+  }>
+}
+
+export type ChecklistItemStatus = 'present' | 'partial' | 'missing' | 'not_applicable'
+
+// One persisted checklist row (denormalized: stores section + requirement so the
+// result is self-contained and survives changes to the static guideline data).
+export interface ReportingChecklistItem {
+  id: string
+  session_id: string
+  guideline_id: string
+  item_code: string
+  section?: string
+  requirement?: string
+  status: ChecklistItemStatus
+  evidence?: string
+  fix?: string
+}
+
+// Raw AI output shape (one entry per item the model judged).
+export interface ReportingCheckerResult {
+  summary: string
+  items: Array<{
+    code: string
+    status: ChecklistItemStatus
+    evidence: string
+    fix: string
   }>
 }

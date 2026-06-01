@@ -26,11 +26,14 @@ function sampleSession(): ReviewSession {
     journal_matches: [
       { id: 'j1', session_id: 's1', rank: 1, journal_name: 'Journal of Widgets', publisher: 'Elsevier', fit_score: 0.82, acceptance_band: 'medium', impact_factor_range: '4.2-5.8', avg_decision_days: 60, key_change_required: 'add control', open_access_options: 'Hybrid', apc_cost: '$2,500 APC', rationale: 'good scope fit' },
     ],
+    reporting_checklist_items: [
+      { id: 'r1', session_id: 's1', guideline_id: 'consort_2010', item_code: '1', section: 'Title and abstract', requirement: 'Identification as a randomised trial in the title', status: 'present', evidence: 'title says RCT', fix: '' },
+    ],
   }
 }
 
 describe('generateReviewMatrix', () => {
-  it('produces a workbook with the four expected sheets', () => {
+  it('produces a workbook with the five expected sheets', () => {
     const buf = generateReviewMatrix(sampleSession(), 'My Paper')
     const wb = XLSX.read(buf, { type: 'buffer' })
     expect(wb.SheetNames).toEqual([
@@ -38,6 +41,7 @@ describe('generateReviewMatrix', () => {
       'Response Matrix',
       'Adversarial Review',
       'Journal Targets',
+      'Reporting Checklist',
     ])
   })
 
@@ -58,8 +62,16 @@ describe('generateReviewMatrix', () => {
     expect(flat).toContain('minor revision')
   })
 
+  it('writes checklist items into the Reporting Checklist sheet', () => {
+    const buf = generateReviewMatrix(sampleSession(), 'My Paper')
+    const wb = XLSX.read(buf, { type: 'buffer' })
+    const rows = XLSX.utils.sheet_to_json<string[]>(wb.Sheets['Reporting Checklist'], { header: 1 })
+    const flat = rows.flat().join(' ')
+    expect(flat).toContain('Identification as a randomised trial in the title')
+  })
+
   it('does not throw when result sections are empty', () => {
-    const empty: ReviewSession = { ...sampleSession(), scores: [], annotations: [], adversarial_critiques: [], journal_matches: [] }
+    const empty: ReviewSession = { ...sampleSession(), scores: [], annotations: [], adversarial_critiques: [], journal_matches: [], reporting_checklist_items: [] }
     expect(() => generateReviewMatrix(empty, 'Empty')).not.toThrow()
   })
 })
