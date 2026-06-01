@@ -13,6 +13,8 @@ import { ProgressComparator } from './ProgressComparator'
 import { FieldConfirm } from './FieldConfirm'
 import { ReportingChecklist } from './ReportingChecklist'
 import { PdfReportModal } from './PdfReportModal'
+import { ReviewStages } from './ReviewStages'
+import { reviewNumberFromSession } from '@/lib/review/sequence'
 import { detectGuideline } from '@/lib/reporting/detect'
 import { GUIDELINES, GUIDELINE_IDS, type ReportingGuidelineId } from '@/lib/reporting/guidelines'
 import type { ReviewSession, ReviewerPersona } from '@/lib/types'
@@ -23,7 +25,7 @@ const VERDICT_LABEL: Record<string, string> = {
   major_revision: 'Major revision', reject: 'Reject',
 }
 
-export function ReviewDashboard({ sessionId }: { sessionId: string }) {
+export function ReviewDashboard({ sessionId, manuscriptId }: { sessionId: string; manuscriptId: string }) {
   const [session, setSession] = useState<ReviewSession | null>(null)
   const [starting, setStarting] = useState(false)
   const [startingJournals, setStartingJournals] = useState(false)
@@ -186,9 +188,17 @@ export function ReviewDashboard({ sessionId }: { sessionId: string }) {
   const activeGuideline: ReportingGuidelineId =
     selectedGuideline ?? (session.reporting_guideline_id as ReportingGuidelineId) ?? detected.id
 
+  const reviewNumber = reviewNumberFromSession(
+    session as unknown as { drafts?: { version_number?: number } }
+  )
+
   return (
     <div>
+      <ReviewStages manuscriptId={manuscriptId} currentSessionId={sessionId} />
       <div className="mb-4 flex items-center gap-3">
+        <span className="rounded-full border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+          Review {reviewNumber}
+        </span>
         <Badge>{VERDICT_LABEL[session.verdict ?? ''] ?? session.verdict}</Badge>
         <span className="text-lg font-semibold">{session.overall_score ?? 0} / 80</span>
         <Button variant="outline" className="ml-auto" onClick={() => setShowPdf(true)}>

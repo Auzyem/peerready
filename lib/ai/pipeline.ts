@@ -199,5 +199,7 @@ async function runProgressComparison(
     v1Annotations: (prior.annotations as Annotation[]) ?? [],
   })
 
-  await supabase.from('review_sessions').update({ score_delta: result }).eq('id', sessionId)
+  await supabase.from('review_sessions')
+    .update({ score_delta: result, compared_to_session_id: prior.id })
+    .eq('id', sessionId)
 }

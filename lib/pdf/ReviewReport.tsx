@@ -75,7 +75,7 @@ function severityColor(severity: string) {
 
 export interface ReviewPdfProps {
   session: ReviewSession & {
-    drafts?: { manuscripts?: { title?: string; abstract?: string } }
+    drafts?: { version_number?: number; manuscripts?: { title?: string; abstract?: string } }
   }
   generatedAt: string
 }
@@ -83,6 +83,8 @@ export interface ReviewPdfProps {
 export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
   const v = verdictStyle(session.verdict ?? '')
   const title = session.drafts?.manuscripts?.title ?? 'Untitled manuscript'
+  const reviewNumber = session.drafts?.version_number
+  const headerTitle = reviewNumber ? `PeerReady — Review ${reviewNumber}` : 'PeerReady — Review report'
   const scores = session.scores ?? []
   const annotations = session.annotations ?? []
   const critiques = session.adversarial_critiques ?? []
@@ -96,7 +98,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Text style={styles.headerTitle}>PeerReady — Review report</Text>
+            <Text style={styles.headerTitle}>{headerTitle}</Text>
             <Text style={styles.headerSub}>{title}</Text>
             <Text style={[styles.headerSub, { marginTop: 4 }]}>Generated {generatedAt}</Text>
           </View>

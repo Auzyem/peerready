@@ -18,7 +18,7 @@ export async function GET(
       journal_matches(*),
       adversarial_critiques(*),
       reporting_checklist_items(*),
-      drafts(manuscripts(field, subfield, doc_type, title, abstract))
+      drafts(version_number, manuscript_id, manuscripts(field, subfield, doc_type, title, abstract))
     `)
     .eq('id', params.sessionId)
     .single()
