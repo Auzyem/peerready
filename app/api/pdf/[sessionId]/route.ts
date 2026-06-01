@@ -28,7 +28,7 @@ export async function GET(
       adversarial_critiques(*),
       journal_matches(*),
       reporting_checklist_items(*),
-      drafts(manuscripts(title, abstract))
+      drafts(version_number, manuscripts(title, abstract))
     `)
     .eq('id', params.sessionId)
     .single()
@@ -37,7 +37,7 @@ export async function GET(
 
   const generatedAt = format(new Date(), 'dd MMM yyyy, HH:mm')
   const element = createElement(ReviewPDFDocument, {
-    session: session as unknown as ReviewSession & { drafts?: { manuscripts?: { title?: string; abstract?: string } } },
+    session: session as unknown as ReviewSession & { drafts?: { version_number?: number; manuscripts?: { title?: string; abstract?: string } } },
     generatedAt,
   })
   const buffer = await renderToBuffer(
