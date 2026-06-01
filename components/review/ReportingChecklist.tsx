@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { computeCompleteness } from '@/lib/reporting/completeness'
+import { sortByGuidelineOrder } from '@/lib/reporting/order'
 import type { ReportingChecklistItem, ChecklistItemStatus } from '@/lib/types'
 
 const STATUS_COLOR: Record<ChecklistItemStatus, string> = {
@@ -31,9 +32,10 @@ export function ReportingChecklist({
   const present = items.filter(i => i.status === 'present').length
   const pct = Math.round(computeCompleteness(items) * 100)
 
-  // Group by section, preserving first-seen order.
+  // Restore canonical guideline order (the DB read has no ORDER BY), then group by section
+  // preserving that order.
   const sections: { name: string; items: ReportingChecklistItem[] }[] = []
-  for (const item of items) {
+  for (const item of sortByGuidelineOrder(items)) {
     const name = item.section ?? 'Other'
     let group = sections.find(s => s.name === name)
     if (!group) { group = { name, items: [] }; sections.push(group) }

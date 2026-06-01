@@ -28,15 +28,25 @@ export async function POST(request: NextRequest) {
   if (session.status !== 'complete') {
     return NextResponse.json({ error: 'Standard review is not complete yet' }, { status: 409 })
   }
-  if (session.reporting_check_status === 'running' || session.reporting_check_status === 'complete') {
+
+  // Atomically claim the slot: flip to 'running' and persist the chosen guideline in a single
+  // conditional UPDATE gated on the current state. The non-atomic SELECT above is only for the
+  // friendly 404 / "review not complete" messages — this UPDATE is the real guard. Concurrent
+  // requests (multi-tab, retries, scripts) race here and exactly one wins; the loser matches
+  // zero rows and gets a 409 instead of spawning a second pipeline (doubled Claude cost +
+  // duplicate rows). Allowed start states are 'not_started' and 'failed' (so a failed run can
+  // be retried), which is why this can't be expressed as a plain not-running/not-complete read.
+  const { data: claimed, error: claimError } = await supabase
+    .from('review_sessions')
+    .update({ reporting_check_status: 'running', reporting_guideline_id: guidelineId })
+    .eq('id', sessionId)
+    .in('reporting_check_status', ['not_started', 'failed'])
+    .select('id')
+
+  if (claimError) return NextResponse.json({ error: claimError.message }, { status: 500 })
+  if (!claimed || claimed.length === 0) {
     return NextResponse.json({ error: 'Reporting check already running or complete' }, { status: 409 })
   }
-
-  // Persist the chosen guideline so the pipeline (service-role, no body) can read it.
-  await supabase
-    .from('review_sessions')
-    .update({ reporting_guideline_id: guidelineId })
-    .eq('id', sessionId)
 
   const pipeline = runReportingCheckPipeline(sessionId)
   pipeline.catch((e) => console.error('[reporting check pipeline] failed:', e))

@@ -15,6 +15,11 @@ describe('detectGuideline', () => {
     expect(detectGuideline({ abstract: 'We conducted an RCT.' }).id).toBe('consort_2010')
   })
 
+  it('matches the plural acronym and phrase', () => {
+    expect(detectGuideline({ abstract: 'We pooled results from three RCTs.' }).id).toBe('consort_2010')
+    expect(detectGuideline({ title: 'Two randomized controlled trials of Y' }).id).toBe('consort_2010')
+  })
+
   it('routes animal studies to ARRIVE', () => {
     expect(detectGuideline({ abstract: 'Experiments were performed in vivo using mice.' }).id).toBe('arrive_2')
   })

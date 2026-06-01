@@ -12,7 +12,7 @@ export interface DetectResult {
   rationale: string
 }
 
-const RCT_RE = /randomi[sz]ed\s+controlled\s+trial|\bRCT\b/i
+const RCT_RE = /randomi[sz]ed\s+controlled\s+trials?|\bRCTs?\b/i
 const ANIMAL_RE = /\b(mice|mouse|rats?|in vivo|animal model|murine|zebrafish)\b/i
 const OBSERVATIONAL_RE = /\b(cohort|case[-\s]control|cross[-\s]sectional|observational)\b/i
 

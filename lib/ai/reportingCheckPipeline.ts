@@ -3,6 +3,12 @@ import { runReportingChecker } from './prompts/reportingChecker'
 import { GUIDELINES, type ReportingGuidelineId } from '@/lib/reporting/guidelines'
 import type { ChecklistItemStatus } from '@/lib/types'
 
+// The DB CHECK constraint only accepts these four. The model is instructed to return them,
+// but a stray value ('partially_present', 'PRESENT', 'n/a', …) would otherwise abort the
+// entire batched insert with a CHECK violation — so coerce anything unexpected to 'missing',
+// mirroring how unknown item codes already default to 'missing' below.
+const ALLOWED_STATUSES = new Set<ChecklistItemStatus>(['present', 'partial', 'missing', 'not_applicable'])
+
 export async function runReportingCheckPipeline(sessionId: string) {
   const supabase = createAdminClient()
 
@@ -34,7 +40,9 @@ export async function runReportingCheckPipeline(sessionId: string) {
     const byCode = new Map(result.items.map(i => [i.code, i]))
     const rows = guideline.items.map(item => {
       const verdict = byCode.get(item.code)
-      const status = (verdict?.status ?? 'missing') as ChecklistItemStatus
+      const raw = verdict?.status
+      const status: ChecklistItemStatus =
+        raw && ALLOWED_STATUSES.has(raw as ChecklistItemStatus) ? (raw as ChecklistItemStatus) : 'missing'
       return {
         session_id: sessionId,
         guideline_id: guideline.id,
@@ -47,13 +55,18 @@ export async function runReportingCheckPipeline(sessionId: string) {
       }
     })
     if (rows.length > 0) {
-      await supabase.from('reporting_checklist_items').insert(rows)
+      // supabase-js returns errors on the response rather than throwing, so an unchecked
+      // failure here (e.g. a schema-cache-stale PGRST205, RLS denial, or CHECK violation)
+      // would silently leave the session 'complete' with zero rows. Surface it to the catch.
+      const { error: insertError } = await supabase.from('reporting_checklist_items').insert(rows)
+      if (insertError) throw insertError
     }
 
-    await supabase
+    const { error: updateError } = await supabase
       .from('review_sessions')
       .update({ reporting_check_status: 'complete', reporting_summary: result.summary })
       .eq('id', sessionId)
+    if (updateError) throw updateError
   } catch (err: unknown) {
     await supabase
       .from('review_sessions')

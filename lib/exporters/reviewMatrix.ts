@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx'
+import { sortByGuidelineOrder } from '@/lib/reporting/order'
 import type { ReviewSession } from '@/lib/types'
 
 type Cell = string | number | null
@@ -90,7 +91,7 @@ export function generateReviewMatrix(session: ReviewSession, manuscriptTitle?: s
   // Sheet 5 — Reporting checklist
   const reportingData: Cell[][] = [
     ['Code', 'Section', 'Requirement', 'Status', 'Evidence', 'Fix'],
-    ...(session.reporting_checklist_items ?? []).map((r): Cell[] => [
+    ...sortByGuidelineOrder(session.reporting_checklist_items ?? []).map((r): Cell[] => [
       r.item_code,
       r.section ?? '',
       r.requirement ?? '',
