@@ -13,7 +13,12 @@ type SubWithPeriod = Stripe.Subscription & {
 
 async function syncSubscription(subscription: Stripe.Subscription) {
   const userId = subscription.metadata?.supabase_user_id
-  if (!userId) return
+  if (!userId) {
+    // Subscriptions created outside our checkout flow (e.g. the Stripe dashboard)
+    // won't carry our metadata — surface it rather than dropping silently.
+    console.warn(`[stripe webhook] subscription ${subscription.id} has no supabase_user_id metadata; skipping sync`)
+    return
+  }
 
   const s = subscription as SubWithPeriod
   const priceId = subscription.items.data[0]?.price?.id ?? ''
@@ -81,20 +86,22 @@ export async function POST(request: NextRequest) {
 
   const supabaseAdmin = createAdminClient()
 
-  // Idempotency — skip events we've already processed.
-  const { data: existing } = await supabaseAdmin
-    .from('billing_events')
-    .select('id')
-    .eq('stripe_event_id', event.id)
-    .single()
-  if (existing) return NextResponse.json({ ok: true, skipped: true })
-
-  await supabaseAdmin.from('billing_events').insert({
+  // Idempotency — insert first and let the unique constraint on stripe_event_id
+  // arbitrate. This closes the concurrent-retry window a select-then-insert leaves
+  // open (Stripe retries are common). A unique violation (23505) means we've already
+  // processed this event, so we skip the handlers.
+  const { error: insertError } = await supabaseAdmin.from('billing_events').insert({
     stripe_event_id: event.id,
     event_type: event.type,
     payload: event.data.object as unknown as Record<string, unknown>,
     user_id: (event.data.object as { metadata?: { supabase_user_id?: string } })?.metadata?.supabase_user_id ?? null,
   })
+  if (insertError) {
+    if (insertError.code === '23505') return NextResponse.json({ ok: true, skipped: true })
+    // Any other insert failure is unexpected — log and stop before double-processing.
+    console.error('[stripe webhook] failed to record event:', insertError.message)
+    return NextResponse.json({ error: 'Failed to record event' }, { status: 500 })
+  }
 
   switch (event.type) {
     case 'checkout.session.completed': {
