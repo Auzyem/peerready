@@ -15,6 +15,7 @@ create table if not exists public.billing_events (
 
 alter table public.billing_events enable row level security;
 -- Reading user_roles from a policy on billing_events is fine (no recursion).
+drop policy if exists "admins_read_billing_events" on public.billing_events;
 create policy "admins_read_billing_events" on public.billing_events for select using (
   exists (select 1 from public.user_roles where user_id = auth.uid() and role in ('super_admin','admin'))
 );

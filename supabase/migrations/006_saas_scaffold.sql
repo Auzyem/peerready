@@ -36,6 +36,7 @@ create table if not exists public.subscriptions (
 );
 
 alter table public.subscriptions enable row level security;
+drop policy if exists "users_own_subscription" on public.subscriptions;
 create policy "users_own_subscription" on public.subscriptions for all using (auth.uid() = user_id);
 
 -- Auto-create a free subscription whenever a profile is created
@@ -69,4 +70,5 @@ create table if not exists public.user_roles (
 );
 
 alter table public.user_roles enable row level security;
+drop policy if exists "users_read_own_role" on public.user_roles;
 create policy "users_read_own_role" on public.user_roles for select using (auth.uid() = user_id);
