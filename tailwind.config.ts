@@ -9,7 +9,21 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+      },
       colors: {
+        "pr-navy": "#0D1B4B",
+        "pr-navy-hover": "#16277A",
+        "pr-teal": "#0E7C6B",
+        "pr-teal-hover": "#0A6358",
+        "pr-teal-light": "#E6F4F1",
+        "pr-gold": "#C57B00",
+        "pr-gold-light": "#FEF3C7",
+        "pr-green": "#15803D",
+        "pr-green-light": "#DCFCE7",
+        "pr-red": "#B91C1C",
+        "pr-red-light": "#FEE2E2",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
