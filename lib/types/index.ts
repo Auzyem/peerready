@@ -64,6 +64,7 @@ export interface ReviewSession {
   strength_summary?: string
   weakness_summary?: string
   score_delta?: ProgressComparatorResult
+  compared_to_session_id?: string
   error_message?: string
   adversarial_status?: 'not_started' | 'running' | 'complete' | 'failed'
   adversarial_summary?: string
