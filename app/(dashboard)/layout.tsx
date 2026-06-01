@@ -11,9 +11,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const [{ data: profile }, { data: sub }] = await Promise.all([
+    supabase.from('profiles').select('full_name, career_stage').eq('id', user.id).single(),
+    supabase.from('subscriptions').select('plan_id').eq('user_id', user.id).single(),
+  ])
+
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar
+        name={profile?.full_name ?? undefined}
+        careerStage={profile?.career_stage ?? undefined}
+        plan={sub?.plan_id ?? 'free'}
+      />
       <div className="flex flex-1 flex-col">
         <TopBar email={user.email} />
         <main className="flex-1 p-6">{children}</main>
