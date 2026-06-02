@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react'
 interface PermissionDef { id: string; label: string; description?: string; category?: string }
 interface Grant { role: string; permission_id: string }
 
-const ROLES = ['super_admin', 'admin', 'reviewer', 'author']
-
 export function AdminRoles() {
+  const [roles, setRoles] = useState<string[]>([])
   const [permissions, setPermissions] = useState<PermissionDef[]>([])
   const [grantSet, setGrantSet] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -18,7 +17,8 @@ export function AdminRoles() {
   useEffect(() => {
     fetch('/api/admin/roles/permissions')
       .then(r => r.json())
-      .then(({ permissions: p, grants }: { permissions: PermissionDef[]; grants: Grant[] }) => {
+      .then(({ roles: rs, permissions: p, grants }: { roles: string[]; permissions: PermissionDef[]; grants: Grant[] }) => {
+        setRoles(rs ?? [])
         setPermissions(p ?? [])
         setGrantSet(new Set((grants ?? []).map(g => key(g.role, g.permission_id))))
         setLoading(false)
@@ -82,7 +82,7 @@ export function AdminRoles() {
           <thead className="bg-muted/50 text-left text-xs text-muted-foreground">
             <tr>
               <th className="p-3 font-medium">Permission</th>
-              {ROLES.map(r => <th key={r} className="p-3 text-center font-medium">{r}</th>)}
+              {roles.map(r => <th key={r} className="p-3 text-center font-medium">{r}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -90,6 +90,7 @@ export function AdminRoles() {
               <FragmentRows
                 key={cat}
                 category={cat}
+                roles={roles}
                 permissions={permissions.filter(p => (p.category ?? 'other') === cat)}
                 grantSet={grantSet}
                 pending={pending}
@@ -104,8 +105,9 @@ export function AdminRoles() {
   )
 }
 
-function FragmentRows({ category, permissions, grantSet, pending, toggle, keyFn }: {
+function FragmentRows({ category, roles, permissions, grantSet, pending, toggle, keyFn }: {
   category: string
+  roles: string[]
   permissions: PermissionDef[]
   grantSet: Set<string>
   pending: string | null
@@ -115,7 +117,7 @@ function FragmentRows({ category, permissions, grantSet, pending, toggle, keyFn 
   return (
     <>
       <tr className="border-t bg-muted/30">
-        <td colSpan={ROLES.length + 1} className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <td colSpan={roles.length + 1} className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {category}
         </td>
       </tr>
@@ -125,7 +127,7 @@ function FragmentRows({ category, permissions, grantSet, pending, toggle, keyFn 
             <div className="font-medium">{p.label}</div>
             {p.description && <div className="text-xs text-muted-foreground">{p.description}</div>}
           </td>
-          {ROLES.map(role => {
+          {roles.map(role => {
             const k = keyFn(role, p.id)
             const checked = role === 'super_admin' || grantSet.has(k)
             return (

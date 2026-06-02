@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requirePermission, permissionErrorResponse } from '@/lib/admin/permissions'
+import { ROLES, isAdminRole } from '@/lib/admin/roles'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
-// GET: the full permissions catalogue + the role→permission grant matrix.
+// GET: the recognized roles + the full permissions catalogue + the
+// role→permission grant matrix. The client renders columns from `roles` so
+// the matrix can never drift from the roles the system actually honors.
 export async function GET() {
   try {
     await requirePermission('system.view_logs')
@@ -13,7 +16,7 @@ export async function GET() {
       admin.from('permissions').select('*').order('category'),
       admin.from('role_permissions').select('role, permission_id'),
     ])
-    return NextResponse.json({ permissions: permissions ?? [], grants: grants ?? [] })
+    return NextResponse.json({ roles: ROLES, permissions: permissions ?? [], grants: grants ?? [] })
   } catch (error) {
     return permissionErrorResponse(error)
   }
@@ -28,6 +31,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (!role || !permissionId) {
       return NextResponse.json({ error: 'role and permissionId required' }, { status: 400 })
+    }
+    if (!isAdminRole(role)) {
+      return NextResponse.json({ error: `unknown role: ${role}` }, { status: 400 })
     }
     if (role === 'super_admin') {
       return NextResponse.json({ error: 'super_admin permissions cannot be edited' }, { status: 400 })

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { isAdminRole } from '@/lib/admin/roles'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .select('role')
     .eq('user_id', user.id)
 
-  const hasAdminAccess = (roles ?? []).some(r => ['super_admin', 'admin'].includes(r.role))
+  const hasAdminAccess = (roles ?? []).some(r => isAdminRole(r.role))
   if (!hasAdminAccess) redirect('/dashboard')
 
   return <>{children}</>

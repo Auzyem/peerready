@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { isAdminRole } from '@/lib/admin/roles'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 
@@ -17,7 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     supabase.from('user_roles').select('role').eq('user_id', user.id),
   ])
 
-  const isAdmin = (roles ?? []).some(r => ['super_admin', 'admin'].includes(r.role))
+  const isAdmin = (roles ?? []).some(r => isAdminRole(r.role))
 
   return (
     <div className="flex min-h-screen">
