@@ -32,7 +32,7 @@ export function ReviewTopBar({
           <a href={`/api/export/${sessionId}`} download>.xlsx</a>
         </Button>
         <Button asChild size="sm">
-          <Link href={`/manuscripts/${manuscriptId}`}>Upload revision</Link>
+          <Link href={`/manuscripts/${manuscriptId}/upload`}>Upload revision</Link>
         </Button>
       </div>
     </div>
