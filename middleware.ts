@@ -22,11 +22,18 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  const pathname = request.nextUrl.pathname
   const publicPaths = ['/', '/login', '/signup', '/api', '/auth']
-  const isPublic = publicPaths.some(p => request.nextUrl.pathname.startsWith(p))
+  const isPublic = publicPaths.some(p => pathname.startsWith(p))
+  const isAuthPage = pathname === '/login' || pathname === '/signup'
 
   if (!user && !isPublic) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Logged-in users have no business on the login/signup pages.
+  if (user && isAuthPage) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return supabaseResponse

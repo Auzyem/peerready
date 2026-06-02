@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe/client'
 
 export async function POST() {
+  try {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -23,4 +24,9 @@ export async function POST() {
   })
 
   return NextResponse.json({ url: session.url })
+  } catch (error: unknown) {
+    console.error('[api/billing/portal] error:', error)
+    const message = error instanceof Error ? error.message : 'Could not open billing portal'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }

@@ -1,3 +1,4 @@
+
 # PeerReady — Brand Foundation + Sidebar (Phase 3) Design
 
 **Date:** 2026-06-01
@@ -6,7 +7,9 @@
 
 ## Context
 
-The app styles everything through **shadcn semantic tokens** — HSL CSS variables in
+The app styles everything through **shadcn semantic tokens** — HSL CSS va
+
+riables in
 `app/globals.css` (`--primary`, `--muted`, `--border`, `--destructive`, …) mapped to Tailwind
 colors in `tailwind.config.ts`. Every component (Button, Card, Badge, inputs, the current
 sidebar) consumes those tokens. Remapping the variable *values* rebrands the whole app from one

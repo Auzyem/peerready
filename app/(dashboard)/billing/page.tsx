@@ -7,20 +7,31 @@ import { Card } from '@/components/ui/card'
 
 type Interval = 'monthly' | 'annual'
 
-const PLANS = [
-  { id: 'free', name: 'Free', price: { monthly: 0, annual: 0 }, description: 'Try the core review engine',
-    features: ['3 manuscripts', '2 reviews per month', 'Score breakdown', 'Inline annotations'], cta: 'Current plan', highlight: false },
-  { id: 'starter', name: 'Starter', price: { monthly: 12, annual: 8 }, description: 'For active PhD students',
-    features: ['20 manuscripts', '10 reviews per month', 'Journal matching', 'PDF reports', 'Send to author'], cta: 'Upgrade to Starter', highlight: false },
-  { id: 'pro', name: 'Pro', price: { monthly: 29, annual: 19 }, description: 'For serious researchers',
-    features: ['100 manuscripts', '30 reviews per month', 'Adversarial review', 'Journal matching', 'PDF reports', '7-day free trial'], cta: 'Start Pro trial', highlight: true },
-  { id: 'team', name: 'Team', price: { monthly: 79, annual: 59 }, description: 'For labs and departments',
-    features: ['Unlimited manuscripts', 'Unlimited reviews', 'All Pro features', 'Team members', 'Admin dashboard', 'API access'], cta: 'Upgrade to Team', highlight: false },
-] as const
+interface DbPlan {
+  id: string
+  name: string
+  price_monthly_usd: number | null
+  price_annual_monthly_usd: number | null
+  annual_discount_pct: number | null
+}
+
+// Presentation-only metadata (copy + feature lists). Prices and discounts come
+// from the database so admins can edit them; this just describes each plan.
+const PLAN_META: Record<string, { description: string; features: string[]; cta: string; highlight: boolean }> = {
+  free: { description: 'Try the core review engine', highlight: false, cta: 'Current plan',
+    features: ['3 manuscripts', '2 reviews per month', 'Score breakdown', 'Inline annotations'] },
+  starter: { description: 'For active PhD students', highlight: false, cta: 'Upgrade to Starter',
+    features: ['20 manuscripts', '10 reviews per month', 'Journal matching', 'PDF reports', 'Send to author'] },
+  pro: { description: 'For serious researchers', highlight: true, cta: 'Start Pro trial',
+    features: ['100 manuscripts', '30 reviews per month', 'Adversarial review', 'Journal matching', 'PDF reports', '7-day free trial'] },
+  team: { description: 'For labs and departments', highlight: false, cta: 'Upgrade to Team',
+    features: ['Unlimited manuscripts', 'Unlimited reviews', 'All Pro features', 'Team members', 'Admin dashboard', 'API access'] },
+}
 
 export default function BillingPage() {
   const searchParams = useSearchParams()
   const [interval, setBillingInterval] = useState<Interval>('monthly')
+  const [plans, setPlans] = useState<DbPlan[]>([])
   const [currentPlan, setCurrentPlan] = useState('free')
   const [periodEnd, setPeriodEnd] = useState<string | null>(null)
   const [cancelAtEnd, setCancelAtEnd] = useState(false)
@@ -30,6 +41,13 @@ export default function BillingPage() {
 
   const success = searchParams.get('success')
   const canceled = searchParams.get('canceled')
+
+  useEffect(() => {
+    fetch('/api/billing/plans')
+      .then(r => r.json())
+      .then(({ plans: p }) => setPlans(p ?? []))
+      .catch(() => setPlans([]))
+  }, [])
 
   useEffect(() => {
     async function fetchCurrent() {
@@ -53,9 +71,15 @@ export default function BillingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planId, interval }),
       })
-      const { url, error } = await res.json()
-      if (error) throw new Error(error)
-      window.location.href = url
+      // Never call .json() on a potentially-empty body.
+      const text = await res.text()
+      let data: { url?: string; error?: string } = {}
+      try { data = JSON.parse(text) } catch {
+        throw new Error(`Server error (${res.status}): ${text.slice(0, 200) || 'Empty response'}`)
+      }
+      if (!res.ok) throw new Error(data.error ?? `Server error ${res.status}`)
+      if (!data.url) throw new Error('No checkout URL returned')
+      window.location.href = data.url
     } catch (e) {
       setToast({ type: 'error', message: e instanceof Error ? e.message : 'Checkout failed' })
       setLoading(null)
@@ -66,9 +90,14 @@ export default function BillingPage() {
     setManaging(true)
     try {
       const res = await fetch('/api/billing/portal', { method: 'POST' })
-      const { url, error } = await res.json()
-      if (error) throw new Error(error)
-      window.location.href = url
+      const text = await res.text()
+      let data: { url?: string; error?: string } = {}
+      try { data = JSON.parse(text) } catch {
+        throw new Error(`Server error (${res.status})`)
+      }
+      if (!res.ok) throw new Error(data.error ?? 'Could not open portal')
+      if (!data.url) throw new Error('No portal URL returned')
+      window.location.href = data.url
     } catch (e) {
       setToast({ type: 'error', message: e instanceof Error ? e.message : 'Could not open portal' })
       setManaging(false)
@@ -117,7 +146,7 @@ export default function BillingPage() {
         <span className={`text-sm ${interval === 'monthly' ? 'font-medium' : 'text-muted-foreground'}`}>Monthly</span>
         <button
           onClick={() => setBillingInterval((i) => (i === 'monthly' ? 'annual' : 'monthly'))}
-          className={`relative h-6 w-11 rounded-full transition-colors ${interval === 'annual' ? 'bg-primary' : 'bg-muted'}`}
+          className={`relative h-6 w-11 rounded-full transition-colors ${interval === 'annual' ? 'bg-pr-teal' : 'bg-muted'}`}
           aria-label="Toggle billing interval"
         >
           <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${interval === 'annual' ? 'left-[22px]' : 'left-0.5'}`} />
@@ -128,41 +157,65 @@ export default function BillingPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {PLANS.map((plan) => {
+        {plans.map((plan) => {
+          const meta = PLAN_META[plan.id] ?? { description: '', features: [], cta: 'Upgrade', highlight: false }
           const isCurrent = plan.id === currentPlan
+          const monthly = plan.price_monthly_usd ?? 0
+          const annualMonthly = plan.price_annual_monthly_usd ?? 0
+          const annualTotal = annualMonthly * 12
+          const discount = plan.annual_discount_pct ?? 0
           return (
-            <Card key={plan.id} className={`relative flex flex-col p-5 ${plan.highlight ? 'border-2 border-primary' : ''}`}>
-              {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-medium text-primary-foreground">
+            <Card key={plan.id} className={`relative flex flex-col p-5 ${meta.highlight ? 'border-2 border-pr-teal' : ''}`}>
+              {meta.highlight && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-pr-teal px-3 py-0.5 text-xs font-medium text-white">
                   Most popular
                 </div>
               )}
               <div className="mb-3">
                 <div className="text-base font-medium">{plan.name}</div>
-                <div className="text-sm text-muted-foreground">{plan.description}</div>
+                <div className="text-sm text-muted-foreground">{meta.description}</div>
               </div>
+
               <div className="mb-4">
-                <span className="text-3xl font-semibold">${plan.price[interval]}</span>
-                {plan.price.monthly > 0 && <span className="text-sm text-muted-foreground">/mo</span>}
-                {interval === 'annual' && plan.price.annual > 0 && (
-                  <div className="mt-1 text-xs text-muted-foreground">${plan.price.annual * 12}/yr billed annually</div>
+                {interval === 'monthly' ? (
+                  <>
+                    <span className="text-3xl font-semibold">${monthly}</span>
+                    {monthly > 0 && <span className="text-sm text-muted-foreground">/mo</span>}
+                  </>
+                ) : (
+                  <>
+                    <span className="text-3xl font-semibold">${annualMonthly}</span>
+                    <span className="text-sm text-muted-foreground">/mo</span>
+                    {annualTotal > 0 && (
+                      <div className="mt-1 text-[17px] font-bold tracking-tight text-pr-navy">
+                        ${annualTotal.toFixed(2)}
+                        <span className="text-xs font-normal text-muted-foreground"> billed annually</span>
+                      </div>
+                    )}
+                    {discount > 0 && (
+                      <div className="mt-1 inline-block rounded-full bg-pr-teal/10 px-2 py-0.5 text-[11px] font-medium text-pr-teal">
+                        Save {discount}% vs monthly
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
+
               <ul className="mb-5 flex-1 space-y-2">
-                {plan.features.map((f) => (
+                {meta.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" /> {f}
+                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-pr-teal" /> {f}
                   </li>
                 ))}
               </ul>
               <Button
                 onClick={() => handleUpgrade(plan.id)}
                 disabled={isCurrent || loading === plan.id || plan.id === 'free'}
-                variant={plan.highlight ? 'default' : 'outline'}
+                variant={meta.highlight ? 'default' : 'outline'}
                 className="w-full"
               >
                 {loading === plan.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {isCurrent ? 'Current plan' : plan.cta}
+                {isCurrent ? 'Current plan' : meta.cta}
               </Button>
             </Card>
           )

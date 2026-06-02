@@ -7,6 +7,7 @@ import { RATE_LIMITS, hourAgoIso } from '@/lib/rateLimit'
 const MAX_BYTES = 10 * 1024 * 1024
 
 export async function POST(request: NextRequest) {
+  try {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -86,4 +87,9 @@ export async function POST(request: NextRequest) {
   }).eq('id', manuscriptId)
 
   return NextResponse.json({ draft })
+  } catch (error: unknown) {
+    console.error('[api/upload] error:', error)
+    const message = error instanceof Error ? error.message : 'Upload failed'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }

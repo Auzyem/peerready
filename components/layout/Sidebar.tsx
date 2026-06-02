@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, FileText, Settings, CreditCard, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, FileText, Settings, CreditCard, ShieldCheck, type LucideIcon } from 'lucide-react'
 import { shouldShowProBadge } from '@/lib/plan/badge'
 
 interface NavItem { label: string; href: string; icon: LucideIcon; badge?: boolean }
@@ -19,6 +19,7 @@ interface SidebarProps {
   name?: string
   careerStage?: string
   plan?: string
+  isAdmin?: boolean
 }
 
 function initials(name?: string): string {
@@ -35,7 +36,7 @@ const STAGE_LABEL: Record<string, string> = {
   independent: 'Independent researcher',
 }
 
-export function Sidebar({ name, careerStage, plan }: SidebarProps) {
+export function Sidebar({ name, careerStage, plan, isAdmin }: SidebarProps) {
   const pathname = usePathname()
   const showPro = shouldShowProBadge(plan)
 
@@ -75,6 +76,19 @@ export function Sidebar({ name, careerStage, plan }: SidebarProps) {
       <nav className="border-t border-white/[0.06] py-3">
         <div className="px-4 pb-2 pt-1 text-[10px] font-medium uppercase tracking-[0.06em] text-white/30">Account</div>
         {ACCOUNT.map(renderItem)}
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={`relative flex items-center gap-2.5 px-4 py-2 text-sm transition-colors ${
+              pathname.startsWith('/admin') ? 'bg-white/10 font-medium text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white/90'
+            }`}
+          >
+            {pathname.startsWith('/admin') && <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r bg-pr-teal" />}
+            <ShieldCheck className="h-[15px] w-[15px]" />
+            <span className="flex-1">Admin panel</span>
+            <span className="rounded bg-[#E24B4A] px-1.5 py-0.5 text-[9px] font-medium text-white">ADMIN</span>
+          </Link>
+        )}
       </nav>
 
       <div className="mt-auto flex items-center gap-2.5 border-t border-white/[0.06] px-4 py-3.5">

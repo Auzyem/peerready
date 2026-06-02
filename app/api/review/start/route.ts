@@ -7,6 +7,7 @@ import { RATE_LIMITS, ACTIVE_REVIEW_STATUSES, hourAgoIso } from '@/lib/rateLimit
 export const maxDuration = 300
 
 export async function POST(request: NextRequest) {
+  try {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -46,6 +47,9 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!session?.id) {
+    return NextResponse.json({ error: 'Failed to create review session' }, { status: 500 })
+  }
 
   // Run the pipeline detached from the response lifecycle. The promise starts
   // executing immediately; waitUntil keeps the serverless function alive on
@@ -60,4 +64,9 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ sessionId: session.id })
+  } catch (error: unknown) {
+    console.error('[api/review/start] error:', error)
+    const message = error instanceof Error ? error.message : 'Failed to start review'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }

@@ -21,7 +21,9 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
     if (error) { setError(error.message); return }
-    router.push('/dashboard')
+    // replace (not push) so the login page is not left in history, and refresh
+    // so the middleware re-reads the freshly-set session cookie.
+    router.replace('/dashboard')
     router.refresh()
   }
 

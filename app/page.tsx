@@ -4,6 +4,7 @@ import {
   ArrowRight, Mail, Check,
 } from 'lucide-react'
 import { ScoreRadar } from '@/components/review/ScoreRadar'
+import { PricingSection } from '@/components/marketing/PricingSection'
 import type { Score } from '@/lib/types'
 
 const DEMO_SCORES: Score[] = [
@@ -43,6 +44,7 @@ export default function Home() {
           <nav className="hidden items-center gap-6 text-sm text-slate-600 sm:flex">
             <a href="#how" className="hover:text-slate-900">How it works</a>
             <a href="#features" className="hover:text-slate-900">Features</a>
+            <a href="#pricing" className="hover:text-slate-900">Pricing</a>
             <a href="#contact" className="hover:text-slate-900">Contact</a>
           </nav>
           <div className="flex items-center gap-3 text-sm">
@@ -125,6 +127,9 @@ export default function Home() {
           </ol>
         </div>
       </section>
+
+      {/* Pricing */}
+      <PricingSection />
 
       {/* Features */}
       <section id="features" className="mx-auto max-w-6xl px-6 py-20">
