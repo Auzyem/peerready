@@ -1,3 +1,6 @@
+import { createAdminClient } from '@/lib/supabase/admin'
+import { planIdFromPriceId, intervalFromPriceId } from '@/lib/stripe/client'
+
 /** Monthly price in cents: dollars × 100, rounded to the nearest cent. */
 export function monthlyCents(perMonthUsd: number): number {
   return Math.round(perMonthUsd * 100)
@@ -11,9 +14,6 @@ export function monthlyCents(perMonthUsd: number): number {
 export function annualCents(perMonthUsd: number): number {
   return Math.round(perMonthUsd * 12 * 100)
 }
-
-import { createAdminClient } from '@/lib/supabase/admin'
-import { planIdFromPriceId, intervalFromPriceId } from '@/lib/stripe/client'
 
 type Interval = 'monthly' | 'annual'
 
@@ -35,9 +35,8 @@ export async function getActivePriceId(planId: string, interval: Interval): Prom
 
   if (data?.stripe_price_id) return data.stripe_price_id as string
   // Env fallback — read at call time so tests that mutate process.env see the
-  // updated value. getPriceId also reads the env but via a module-load-time
-  // snapshot; we use the same convention here and delegate to getPriceId which
-  // throws "No Stripe price ID configured for <plan>_<interval>" on a miss.
+  // updated value. STRIPE_PRICES in client.ts snapshots env at module load, so
+  // we read process.env directly here.
   const envKey = `STRIPE_PRICE_${planId.toUpperCase()}_${interval.toUpperCase()}` as keyof NodeJS.ProcessEnv
   const envPriceId = process.env[envKey]
   if (envPriceId) return envPriceId
