@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe, planIdFromPriceId, intervalFromPriceId } from '@/lib/stripe/client'
+import { stripe } from '@/lib/stripe/client'
+import { resolvePlanFromPriceId } from '@/lib/stripe/prices'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type Stripe from 'stripe'
 
@@ -22,8 +23,17 @@ async function syncSubscription(subscription: Stripe.Subscription) {
 
   const s = subscription as SubWithPeriod
   const priceId = subscription.items.data[0]?.price?.id ?? ''
-  const planId = planIdFromPriceId(priceId)
-  const interval = intervalFromPriceId(priceId)
+  const resolved = await resolvePlanFromPriceId(priceId)
+  if (!resolved) {
+    // With the plan_prices history table this should not happen for our prices.
+    // Keep the safe 'free' default but log loudly so a real miss is never silent.
+    console.error(
+      `[stripe webhook] price ${priceId} on subscription ${subscription.id} did not ` +
+      `resolve to a plan; defaulting to free`,
+    )
+  }
+  const planId = resolved?.planId ?? 'free'
+  const interval = resolved?.interval ?? 'monthly'
 
   const status =
     subscription.status === 'active' || subscription.status === 'trialing'
