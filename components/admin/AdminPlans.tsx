@@ -102,24 +102,24 @@ export function AdminPlans() {
   // Runs after the admin confirms the dialog: sync each changed interval, then PATCH.
   const runSync = async () => {
     if (!confirm) return
-    const { planId } = confirm
-    setSaving(planId)
+    const snapshot = confirm
+    setSaving(snapshot.planId)
     setConfirm(null)
     try {
-      for (const c of confirm.changes) {
+      for (const c of snapshot.changes) {
         const res = await fetch('/api/admin/plans/sync-price', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ planId, interval: c.interval, unitAmountUsd: c.usd }),
+          body: JSON.stringify({ planId: snapshot.planId, interval: c.interval, unitAmountUsd: c.usd }),
         })
         const text = await res.text()
         let data: { error?: string } = {}
         try { data = JSON.parse(text) } catch { throw new Error(`Server error (${res.status})`) }
         if (!res.ok) throw new Error(data.error ?? 'Price sync failed')
       }
-      await patchNonPriceFields(planId)
-      setPlans(prev => prev.map(p => (p.id === planId ? { ...p, ...edits[planId] } : p)))
-      setToast(`${confirm.name} plan price synced to Stripe`)
+      await patchNonPriceFields(snapshot.planId)
+      setPlans(prev => prev.map(p => (p.id === snapshot.planId ? { ...p, ...edits[snapshot.planId] } : p)))
+      setToast(`${snapshot.name} plan price synced to Stripe`)
     } catch (e) {
       setToast(`Error: ${e instanceof Error ? e.message : 'Price sync failed'}`)
     }
@@ -216,7 +216,7 @@ export function AdminPlans() {
               {boolField(plan.id, 'pdf_reports', 'PDF reports')}
               {boolField(plan.id, 'api_access', 'API access')}
             </div>
-            <Button onClick={() => save(plan.id)} disabled={saving === plan.id} className="w-full" size="sm">
+            <Button onClick={() => save(plan.id)} disabled={saving === plan.id || confirm?.planId === plan.id} className="w-full" size="sm">
               {saving === plan.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
               Save changes
             </Button>
