@@ -1,0 +1,48 @@
+name: CI
+
+# Runs the real PeerReady gate on every PR into main and on direct pushes to main.
+# `npm run build` is the gate that matters here — `npm test` alone is lenient
+# (it passes even when the production build is broken), so we run both.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel an in-progress run when new commits are pushed to the same PR/branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build & test
+    runs-on: ubuntu-latest
+
+    # Safe dummy values so the build/tests never depend on real secrets.
+    # The Stripe client has a build-only placeholder; the Supabase clients are
+    # lazy (constructed inside functions), so these are belt-and-suspenders for
+    # any statically rendered page. NEVER put real keys here — CI logs are public.
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build
