@@ -4,8 +4,13 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+// Price columns (price_monthly_usd / price_annual_monthly_usd) are deliberately
+// NOT here: they are owned exclusively by POST /api/admin/plans/sync-price, which
+// keeps the displayed price in lockstep with the Stripe-charged price. Allowing
+// them on this plain PATCH would let a caller set a display price with no matching
+// Stripe price — the exact display-vs-charge drift the sync flow exists to prevent.
 const ALLOWED_FIELDS = [
-  'name', 'price_monthly_usd', 'price_annual_monthly_usd', 'annual_discount_pct',
+  'name', 'annual_discount_pct',
   'max_manuscripts', 'max_reviews_per_month', 'adversarial_access',
   'journal_matching', 'pdf_reports', 'team_members', 'api_access',
 ]
