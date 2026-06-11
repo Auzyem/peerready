@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveAuth } from '@/lib/apiKeys/middleware'
 import { parsePDF } from '@/lib/parsers/pdfParser'
 import { parseDOCX } from '@/lib/parsers/docxParser'
 import { RATE_LIMITS, hourAgoIso } from '@/lib/rateLimit'
@@ -8,16 +10,35 @@ const MAX_BYTES = 10 * 1024 * 1024
 
 export async function POST(request: NextRequest) {
   try {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Accepts either the session cookie (browser) or an API key with manuscript:write.
+  const auth = await resolveAuth(request, ['manuscript:write'])
+  if (auth instanceof NextResponse) return auth
+  const { userId, viaApiKey } = auth
+  // Cookie path keeps RLS auto-scoping; API path uses the service-role client
+  // and applies the explicit ownership scoping below.
+  const supabase = viaApiKey ? createAdminClient() : createClient()
 
-  // Rolling hourly upload cap (RLS scopes this count to the current user).
-  const { count } = await supabase
-    .from('drafts')
-    .select('*', { count: 'exact', head: true })
-    .gte('created_at', hourAgoIso())
-  if ((count ?? 0) >= RATE_LIMITS.uploadsPerHour) {
+  // Rolling hourly upload cap.
+  let recentUploads = 0
+  if (viaApiKey) {
+    const { data: mans } = await supabase.from('manuscripts').select('id').eq('user_id', userId)
+    const manIds = (mans ?? []).map((m) => m.id)
+    if (manIds.length > 0) {
+      const { count } = await supabase
+        .from('drafts')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', hourAgoIso())
+        .in('manuscript_id', manIds)
+      recentUploads = count ?? 0
+    }
+  } else {
+    const { count } = await supabase
+      .from('drafts')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', hourAgoIso())
+    recentUploads = count ?? 0
+  }
+  if (recentUploads >= RATE_LIMITS.uploadsPerHour) {
     return NextResponse.json(
       { error: 'Hourly upload limit reached. Please try again later.' },
       { status: 429 }
@@ -31,6 +52,18 @@ export async function POST(request: NextRequest) {
   if (!file || !manuscriptId) {
     return NextResponse.json({ error: 'Missing file or manuscriptId' }, { status: 400 })
   }
+
+  // API-key path bypasses RLS, so verify the manuscript belongs to the caller.
+  if (viaApiKey) {
+    const { data: owned } = await supabase
+      .from('manuscripts')
+      .select('id')
+      .eq('id', manuscriptId)
+      .eq('user_id', userId)
+      .single()
+    if (!owned) return NextResponse.json({ error: 'Manuscript not found' }, { status: 403 })
+  }
+
   const isPdf = file.name.toLowerCase().endsWith('.pdf')
   const isDocx = file.name.toLowerCase().endsWith('.docx')
   if (!isPdf && !isDocx) {
@@ -51,7 +84,7 @@ export async function POST(request: NextRequest) {
     .limit(1)
 
   const versionNumber = drafts?.[0]?.version_number ? drafts[0].version_number + 1 : 1
-  const storagePath = `${user.id}/${manuscriptId}/v${versionNumber}_${file.name}`
+  const storagePath = `${userId}/${manuscriptId}/v${versionNumber}_${file.name}`
 
   const { error: uploadError } = await supabase.storage
     .from('manuscripts')
