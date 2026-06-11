@@ -1,0 +1,7 @@
+# OJS runs on Linux — keep plugin sources LF regardless of contributor OS
+*.php  text eol=lf
+*.tpl  text eol=lf
+*.po   text eol=lf
+*.css  text eol=lf
+*.xml  text eol=lf
+*.md   text eol=lf

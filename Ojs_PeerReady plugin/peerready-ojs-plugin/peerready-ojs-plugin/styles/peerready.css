@@ -1,0 +1,163 @@
+/*
+ * peerready.css
+ *
+ * Styles for the PeerReady OJS Plugin sidebar and status indicators.
+ * Loaded only on OJS backend pages (contexts: 'backend').
+ *
+ * Directory: plugins/generic/peerready/styles/peerready.css
+ */
+
+/* ── Sidebar block ──────────────────────────────────────────────────────────── */
+
+.peerready-sidebar-block {
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    background: #F8FAFC;
+}
+
+.peerready-sidebar-block h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0D1B4B;
+    margin: 0 0 10px 0;
+    padding: 0;
+    border-bottom: 1px solid #E2E8F0;
+    padding-bottom: 8px;
+}
+
+/* ── Status badge ─────────────────────────────────────────────────────────── */
+
+.peerready-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+}
+
+/* Pending */
+.peerready-status-pending {
+    background: #F1F5F9;
+    color: #64748B;
+}
+
+/* Reviewing — teal */
+.peerready-status-reviewing {
+    background: #E6F4F1;
+    color: #0E7C6B;
+}
+
+/* Complete — green */
+.peerready-status-complete {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+/* Failed — red */
+.peerready-status-failed {
+    background: #FEE2E2;
+    color: #B91C1C;
+}
+
+/* ── Status dot ───────────────────────────────────────────────────────────── */
+
+.peerready-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+/* Pulse animation for 'reviewing' state */
+.peerready-dot--pulse {
+    animation: peerready-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes peerready-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.7); }
+}
+
+.peerready-dot--done {
+    background: #15803D;
+}
+
+.peerready-dot--fail {
+    background: #B91C1C;
+}
+
+/* ── View report button ───────────────────────────────────────────────────── */
+
+.peerready-view-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #0D1B4B;
+    color: #FFFFFF !important;
+    border: none;
+    border-radius: 5px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.12s;
+    margin-bottom: 8px;
+    width: 100%;
+    justify-content: center;
+}
+
+.peerready-view-btn:hover {
+    background: #16277A;
+    color: #FFFFFF !important;
+}
+
+.peerready-icon-external {
+    font-size: 11px;
+    line-height: 1;
+}
+
+/* ── Session ID note ──────────────────────────────────────────────────────── */
+
+.peerready-session-id {
+    font-size: 11px;
+    color: #94A3B8;
+    margin: 4px 0 0;
+}
+
+.peerready-session-id code {
+    font-family: monospace;
+    font-size: 11px;
+    background: #E2E8F0;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #475569;
+}
+
+/* ── Settings form extras ─────────────────────────────────────────────────── */
+
+.peerready-test-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.peerready-test-result {
+    font-size: 13px;
+}
+
+.peerready-test-ok {
+    color: #15803D;
+}
+
+.peerready-test-fail {
+    color: #B91C1C;
+}
