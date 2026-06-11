@@ -8,6 +8,9 @@ reviewer would soften.
 
 > Status: working vertical slice, verified end-to-end against live Supabase + Anthropic.
 
+<!-- Deploy: production is Vercel (prod = `main`). If a merge to `main` does not auto-deploy,
+     deploy manually from a synced checkout: `npx vercel deploy --prod --yes`. -->
+
 ## What it does
 
 1. **Upload** a manuscript (`.pdf` / `.docx`). It's stored, parsed, and section-extracted.
