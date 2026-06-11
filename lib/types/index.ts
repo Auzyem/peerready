@@ -227,3 +227,57 @@ export interface ReportingCheckerResult {
     fix: string
   }>
 }
+
+// ── API keys ────────────────────────────────────────────────────────────────
+// Scopes are their own namespace (colon-delimited), distinct from the dotted
+// admin Permission strings in lib/admin/permissions.ts.
+export type ApiKeyScope =
+  | 'review:read'     | 'review:write'
+  | 'manuscript:read' | 'manuscript:write'
+  | 'webhook:manage'  | 'pdf:generate'
+  | 'admin:read'      | 'user:manage'
+
+export type ApiKeyEnvironment = 'live' | 'test'
+
+export interface ApiKey {
+  id: string
+  user_id: string
+  name: string
+  key_hash: string     // never sent to the client
+  key_prefix: string
+  key_suffix: string   // last 4 chars, for masked display
+  scopes: ApiKeyScope[]
+  environment: ApiKeyEnvironment
+  expires_at: string | null
+  last_used_at: string | null
+  revoked: boolean
+  created_at: string
+}
+
+// Returned only at creation time — the plaintext is never retrievable again.
+export interface ApiKeyCreated extends Omit<ApiKey, 'key_hash'> {
+  plain_key: string    // e.g. pr_live_AbCdEfGh...
+}
+
+export interface Webhook {
+  id: string
+  user_id: string
+  name: string
+  url: string
+  events: string[]
+  secret: string
+  active: boolean
+  created_at: string
+}
+
+// All available scopes with display metadata and the minimum plan that grants them.
+export const API_KEY_SCOPES: Record<ApiKeyScope, { label: string; description: string; minPlan: string }> = {
+  'review:read':      { label: 'Read reviews',      description: 'Read review sessions, scores, annotations, and critiques',  minPlan: 'starter' },
+  'review:write':     { label: 'Write reviews',     description: 'Upload manuscripts, start reviews, resolve critique items', minPlan: 'pro' },
+  'manuscript:read':  { label: 'Read manuscripts',  description: 'Read manuscript metadata, drafts, stage status',            minPlan: 'starter' },
+  'manuscript:write': { label: 'Write manuscripts', description: 'Create manuscripts, upload drafts, update metadata',         minPlan: 'pro' },
+  'webhook:manage':   { label: 'Manage webhooks',   description: 'Register, update, and delete outgoing webhook endpoints',   minPlan: 'pro' },
+  'pdf:generate':     { label: 'Generate PDFs',     description: 'Generate and download PDF review reports programmatically', minPlan: 'pro' },
+  'admin:read':       { label: 'Admin read',        description: 'Read user list, plan information, and billing events',      minPlan: 'team' },
+  'user:manage':      { label: 'Manage users',      description: 'Assign roles, invite users, and update user profiles',     minPlan: 'team' },
+}

@@ -13,6 +13,7 @@ const ALLOWED_FIELDS = [
   'name', 'annual_discount_pct',
   'max_manuscripts', 'max_reviews_per_month', 'adversarial_access',
   'journal_matching', 'pdf_reports', 'team_members', 'api_access',
+  'max_api_keys', 'allowed_scopes',
 ]
 
 export async function GET() {

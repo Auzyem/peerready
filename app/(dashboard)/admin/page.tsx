@@ -3,11 +3,13 @@ import { useState } from 'react'
 import { AdminUsers } from '@/components/admin/AdminUsers'
 import { AdminPlans } from '@/components/admin/AdminPlans'
 import { AdminRoles } from '@/components/admin/AdminRoles'
+import { AdminApiKeys } from '@/components/admin/AdminApiKeys'
 
 const TABS = [
   { id: 'users', label: 'Users' },
   { id: 'plans', label: 'Plans & Pricing' },
   { id: 'roles', label: 'Roles' },
+  { id: 'api-keys', label: 'API keys' },
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
@@ -41,6 +43,7 @@ export default function AdminPage() {
       {activeTab === 'users' && <AdminUsers />}
       {activeTab === 'plans' && <AdminPlans />}
       {activeTab === 'roles' && <AdminRoles />}
+      {activeTab === 'api-keys' && <AdminApiKeys />}
     </div>
   )
 }

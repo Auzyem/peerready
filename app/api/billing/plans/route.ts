@@ -10,7 +10,7 @@ export async function GET() {
     const supabase = createClient()
     const { data: plans, error } = await supabase
       .from('plans')
-      .select('id, name, price_monthly_usd, price_annual_monthly_usd, annual_discount_pct, max_manuscripts, max_reviews_per_month, adversarial_access, journal_matching, pdf_reports, team_members, api_access')
+      .select('id, name, price_monthly_usd, price_annual_monthly_usd, annual_discount_pct, max_manuscripts, max_reviews_per_month, adversarial_access, journal_matching, pdf_reports, team_members, api_access, max_api_keys, allowed_scopes')
       .order('price_monthly_usd', { ascending: true })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

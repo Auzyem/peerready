@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { waitUntil } from '@vercel/functions'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveAuth } from '@/lib/apiKeys/middleware'
 import { runReviewPipeline } from '@/lib/ai/pipeline'
 import { RATE_LIMITS, ACTIVE_REVIEW_STATUSES, hourAgoIso } from '@/lib/rateLimit'
 
@@ -8,20 +10,39 @@ export const maxDuration = 300
 
 export async function POST(request: NextRequest) {
   try {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Accepts either the session cookie (browser) or an API key with review:write.
+  const auth = await resolveAuth(request, ['review:write'])
+  if (auth instanceof NextResponse) return auth
+  const { userId, viaApiKey } = auth
+  const supabase = viaApiKey ? createAdminClient() : createClient()
 
   const { draftId, mode = 'standard' } = await request.json()
   if (!draftId) return NextResponse.json({ error: 'draftId required' }, { status: 400 })
 
-  // Rate limit (RLS scopes these counts to the current user):
+  // API-key path bypasses RLS — resolve the caller's draft ids and verify the
+  // target draft belongs to them before doing anything else.
+  let userDraftIds: string[] | null = null
+  if (viaApiKey) {
+    const { data: mans } = await supabase.from('manuscripts').select('id').eq('user_id', userId)
+    const manIds = (mans ?? []).map((m) => m.id)
+    const { data: drafts } = manIds.length
+      ? await supabase.from('drafts').select('id').in('manuscript_id', manIds)
+      : { data: [] as { id: string }[] }
+    userDraftIds = (drafts ?? []).map((d) => d.id)
+    if (!userDraftIds.includes(draftId)) {
+      return NextResponse.json({ error: 'Draft not found' }, { status: 403 })
+    }
+  }
+
+  // Rate limits (cookie path: RLS scopes the counts; API path: scope by draft ids).
   // 1) only one actively-running review at a time
-  const { data: active } = await supabase
+  let activeQuery = supabase
     .from('review_sessions')
     .select('id')
     .in('status', ACTIVE_REVIEW_STATUSES as unknown as string[])
     .limit(1)
+  if (viaApiKey) activeQuery = activeQuery.in('draft_id', userDraftIds ?? [])
+  const { data: active } = await activeQuery
   if (active && active.length > 0) {
     return NextResponse.json(
       { error: 'You already have a review in progress. Please wait for it to finish.' },
@@ -29,10 +50,12 @@ export async function POST(request: NextRequest) {
     )
   }
   // 2) a rolling hourly cap
-  const { count } = await supabase
+  let countQuery = supabase
     .from('review_sessions')
     .select('*', { count: 'exact', head: true })
     .gte('created_at', hourAgoIso())
+  if (viaApiKey) countQuery = countQuery.in('draft_id', userDraftIds ?? [])
+  const { count } = await countQuery
   if ((count ?? 0) >= RATE_LIMITS.reviewsPerHour) {
     return NextResponse.json(
       { error: 'Hourly review limit reached. Please try again later.' },

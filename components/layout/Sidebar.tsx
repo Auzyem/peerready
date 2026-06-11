@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, FileText, Settings, CreditCard, ShieldCheck, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, FileText, Settings, CreditCard, ShieldCheck, Key, type LucideIcon } from 'lucide-react'
 import { shouldShowProBadge } from '@/lib/plan/badge'
 
 interface NavItem { label: string; href: string; icon: LucideIcon; badge?: boolean }
@@ -12,6 +12,7 @@ const WORKSPACE: NavItem[] = [
 ]
 const ACCOUNT: NavItem[] = [
   { label: 'Settings', href: '/settings', icon: Settings },
+  { label: 'API keys', href: '/settings/api-keys', icon: Key },
   { label: 'Billing', href: '/billing', icon: CreditCard, badge: true },
 ]
 
@@ -41,7 +42,8 @@ export function Sidebar({ name, careerStage, plan, isAdmin }: SidebarProps) {
   const showPro = shouldShowProBadge(plan)
 
   const renderItem = (item: NavItem) => {
-    const active = pathname.startsWith(item.href)
+    // Exact match for /settings so it isn't also highlighted on /settings/api-keys.
+    const active = item.href === '/settings' ? pathname === '/settings' : pathname.startsWith(item.href)
     const Icon = item.icon
     return (
       <Link

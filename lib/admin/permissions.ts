@@ -7,6 +7,7 @@ export type Permission =
   | 'manuscripts.view_all' | 'manuscripts.delete_any'
   | 'billing.view' | 'billing.edit_plans' | 'billing.edit_discounts'
   | 'system.view_logs' | 'system.manage_settings'
+  | 'api_keys.view' | 'api_keys.revoke'
 
 export class PermissionError extends Error {
   status: number

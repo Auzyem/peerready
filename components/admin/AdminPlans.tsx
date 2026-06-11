@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Save, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { API_KEY_SCOPES } from '@/lib/types'
 
 interface Plan {
   id: string
@@ -16,6 +17,8 @@ interface Plan {
   journal_matching?: boolean
   pdf_reports?: boolean
   api_access?: boolean
+  max_api_keys?: number
+  allowed_scopes?: string[]
   [key: string]: unknown
 }
 
@@ -165,6 +168,37 @@ export function AdminPlans() {
     </label>
   )
 
+  const scopeSelector = (planId: string) => {
+    const current = (edits[planId]?.allowed_scopes ?? []) as string[]
+    return (
+      <div className="mb-2.5">
+        <label className="mb-1.5 block text-xs text-muted-foreground">Allowed API scopes</label>
+        <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+          {Object.keys(API_KEY_SCOPES).map(scope => {
+            const checked = current.includes(scope)
+            return (
+              <label key={scope} className="flex cursor-pointer items-center gap-1.5 text-xs">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={e =>
+                    change(
+                      planId,
+                      'allowed_scopes',
+                      e.target.checked ? [...current, scope] : current.filter(s => s !== scope)
+                    )
+                  }
+                  className="h-3 w-3"
+                />
+                <code className="font-mono text-xs">{scope}</code>
+              </label>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   if (loading) return <div className="py-10 text-center text-sm text-muted-foreground">Loading plans…</div>
 
   return (
@@ -215,6 +249,10 @@ export function AdminPlans() {
               {boolField(plan.id, 'journal_matching', 'Journal matching')}
               {boolField(plan.id, 'pdf_reports', 'PDF reports')}
               {boolField(plan.id, 'api_access', 'API access')}
+            </div>
+            <div className="mb-3 border-t pt-3">
+              {numField(plan.id, 'max_api_keys', 'Max API keys (-1 = unlimited)')}
+              {scopeSelector(plan.id)}
             </div>
             <Button onClick={() => save(plan.id)} disabled={saving === plan.id || confirm?.planId === plan.id} className="w-full" size="sm">
               {saving === plan.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}

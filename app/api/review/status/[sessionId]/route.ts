@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveAuth } from '@/lib/apiKeys/middleware'
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { sessionId: string } }
 ) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Accepts either the session cookie (browser) or an API key with review:read.
+  const auth = await resolveAuth(request, ['review:read'])
+  if (auth instanceof NextResponse) return auth
+  const { userId, viaApiKey } = auth
+  const supabase = viaApiKey ? createAdminClient() : createClient()
 
   const { data: session, error } = await supabase
     .from('review_sessions')
@@ -18,11 +22,20 @@ export async function GET(
       journal_matches(*),
       adversarial_critiques(*),
       reporting_checklist_items(*),
-      drafts(version_number, manuscript_id, manuscripts(field, subfield, doc_type, title, abstract))
+      drafts(version_number, manuscript_id, manuscripts(user_id, field, subfield, doc_type, title, abstract))
     `)
     .eq('id', params.sessionId)
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 404 })
+  if (error || !session) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  // API-key path bypasses RLS — confirm the session belongs to the caller.
+  if (viaApiKey) {
+    const draft = session.drafts as unknown as { manuscripts?: { user_id?: string } } | null
+    if (draft?.manuscripts?.user_id !== userId) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+  }
+
   return NextResponse.json({ session })
 }
