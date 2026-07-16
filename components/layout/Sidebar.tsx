@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, FileText, Settings, CreditCard, ShieldCheck, Key, type LucideIcon } from 'lucide-react'
 import { shouldShowProBadge } from '@/lib/plan/badge'
+import { Logo } from '@/components/layout/Logo'
 
 interface NavItem { label: string; href: string; icon: LucideIcon; badge?: boolean }
 
@@ -66,8 +67,8 @@ export function Sidebar({ name, careerStage, plan, isAdmin }: SidebarProps) {
   return (
     <aside className="sticky top-0 flex h-screen w-56 shrink-0 flex-col bg-pr-navy">
       <div className="border-b border-white/[0.08] px-4 pb-4 pt-5">
-        <div className="text-[17px] font-semibold tracking-tight text-white">PeerReady</div>
-        <div className="mt-0.5 text-[11px] text-white/40">AI peer review platform</div>
+        <Logo variant="dark" size={24} />
+        <div className="mt-1.5 text-[11px] text-white/40">AI peer review platform</div>
       </div>
 
       <nav className="py-3">
