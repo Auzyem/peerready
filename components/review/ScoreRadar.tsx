@@ -8,7 +8,7 @@ const DIMENSION_ORDER: ScoreDimension[] = [
 const SHORT_LABEL: Record<ScoreDimension, string> = {
   originality: 'Originality',
   significance: 'Significance',
-  methodology: 'Methodology',
+  methodology: 'Method',
   evidence_quality: 'Evidence',
   literature_engagement: 'Literature',
   internal_logic: 'Logic',
@@ -16,7 +16,7 @@ const SHORT_LABEL: Record<ScoreDimension, string> = {
   ethical_compliance: 'Ethics',
 }
 
-const SIZE = 280
+const SIZE = 340
 const CENTER = SIZE / 2
 const R = 95 // chart radius; leaves room for labels
 const MAX = 10
@@ -36,7 +36,7 @@ export function ScoreRadar({ scores }: { scores: Score[] }) {
       viewBox={`0 0 ${SIZE} ${SIZE}`}
       role="img"
       aria-label="Score radar across review dimensions"
-      className="mx-auto h-64 w-64"
+      className="mx-auto h-72 w-72"
     >
       {/* grid rings */}
       {RINGS.map(ring => (
@@ -56,7 +56,7 @@ export function ScoreRadar({ scores }: { scores: Score[] }) {
       {dims.map((d, i) => {
         const angle = spokeAngle(i, n)
         const end = polarToXY(CENTER, CENTER, R, angle)
-        const label = polarToXY(CENTER, CENTER, R + 18, angle)
+        const label = polarToXY(CENTER, CENTER, R + 20, angle)
         const anchor = Math.abs(label.x - CENTER) < 1 ? 'middle' : label.x > CENTER ? 'start' : 'end'
         return (
           <g key={d}>
@@ -67,7 +67,7 @@ export function ScoreRadar({ scores }: { scores: Score[] }) {
             <text
               x={label.x} y={label.y}
               textAnchor={anchor} dominantBaseline="middle"
-              className="fill-slate-500 text-[9px]"
+              className="fill-pr-body text-[11px] font-medium"
             >
               {SHORT_LABEL[d]}
             </text>
@@ -78,11 +78,11 @@ export function ScoreRadar({ scores }: { scores: Score[] }) {
       {/* data polygon */}
       <polygon
         points={toPointsAttr(dataPoints)}
-        className="fill-indigo-500/20 stroke-indigo-500"
+        className="fill-pr-teal/20 stroke-pr-teal"
         strokeWidth={2}
       />
       {dataPoints.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={2.5} className="fill-indigo-500" />
+        <circle key={i} cx={p.x} cy={p.y} r={2.5} className="fill-pr-teal" />
       ))}
     </svg>
   )
