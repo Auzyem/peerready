@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { GoogleButton } from '@/components/auth/GoogleButton'
+import { Logo } from '@/components/layout/Logo'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -28,9 +29,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
+      <Logo size={32} />
       <Card className="w-full max-w-sm p-6">
-        <h1 className="mb-4 text-xl font-semibold">Log in to PeerReady</h1>
+        <h1 className="mb-4 text-xl font-semibold text-pr-navy">Log in</h1>
         <form onSubmit={handleLogin} className="space-y-3">
           <input className="w-full rounded border p-2" type="email" placeholder="Email"
             value={email} onChange={e => setEmail(e.target.value)} required />

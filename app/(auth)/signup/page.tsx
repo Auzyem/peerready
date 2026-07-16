@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { GoogleButton } from '@/components/auth/GoogleButton'
+import { Logo } from '@/components/layout/Logo'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -30,9 +31,10 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
+      <Logo size={32} />
       <Card className="w-full max-w-sm p-6">
-        <h1 className="mb-4 text-xl font-semibold">Create your PeerReady account</h1>
+        <h1 className="mb-4 text-xl font-semibold text-pr-navy">Create your account</h1>
         <form onSubmit={handleSignup} className="space-y-3">
           <input className="w-full rounded border p-2" placeholder="Full name"
             value={fullName} onChange={e => setFullName(e.target.value)} />
