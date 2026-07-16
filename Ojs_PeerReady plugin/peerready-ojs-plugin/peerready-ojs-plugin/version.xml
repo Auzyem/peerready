@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE version SYSTEM "../../../lib/pkp/dtd/pluginVersion.dtd">
+
+<!--
+    version.xml
+    OJS Plugin Version Manifest
+
+    Directory: plugins/generic/peerready/version.xml
+
+    OJS reads this file to:
+    - Display the plugin in Settings > Website > Plugins
+    - Check compatibility before enabling
+    - Drive the plugin gallery version check
+
+    application   — must match the OJS installation type: 'ojs2'
+    type          — always 'plugins.generic' for Generic Plugins
+    release       — your plugin version, semver recommended
+    date          — release date of this version
+    lazy-load     — '1' = plugin only loads on requests that need it (recommended)
+    sitewide      — '1' = plugin active for all journals in a multi-journal install
+-->
+
+<version>
+    <application>ojs2</application>
+    <type>plugins.generic</type>
+    <release>1.0.1</release>
+    <date>2026-06-11</date>
+    <lazy-load>1</lazy-load>
+    <sitewide>0</sitewide>
+</version>

@@ -72,7 +72,7 @@ export default function ManuscriptsPage() {
   return (
     <div>
       {toast && (
-        <div className="fixed right-5 top-5 z-50 flex items-center gap-3 rounded-md bg-pr-navy px-4 py-2.5 text-sm text-white shadow-lg">
+        <div className="fixed right-5 top-5 z-50 flex items-center gap-3 rounded-md bg-pr-teal px-4 py-2.5 text-sm text-white shadow-lg">
           {toast}
           <button onClick={() => setToast(null)} className="text-white/60 hover:text-white"><X className="h-3.5 w-3.5" /></button>
         </div>
@@ -105,7 +105,7 @@ export default function ManuscriptsPage() {
             <button
               key={sv}
               onClick={() => setStatus(sv)}
-              className={`h-9 px-3.5 text-xs capitalize transition ${status === sv ? 'bg-pr-navy text-white' : 'bg-background text-muted-foreground hover:bg-muted'}`}
+              className={`h-9 px-3.5 text-xs capitalize transition ${status === sv ? 'bg-pr-teal text-white' : 'bg-background text-muted-foreground hover:bg-muted'}`}
             >
               {sv}
             </button>

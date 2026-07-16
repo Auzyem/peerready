@@ -72,7 +72,7 @@ export default function ApiKeysPage() {
           <Button
             onClick={() => setShowCreate(true)}
             disabled={atLimit}
-            className="bg-pr-navy hover:bg-pr-navy-hover"
+            className="bg-pr-teal hover:bg-pr-teal-600"
             size="sm"
           >
             <Plus className="h-3.5 w-3.5" /> New key
@@ -117,7 +117,7 @@ export default function ApiKeysPage() {
             <p className="mb-2.5 mt-1 text-xs text-[#92400E]">
               Connect OJS, Zapier, or any external service to PeerReady by upgrading your plan.
             </p>
-            <Button asChild size="sm" className="bg-pr-navy hover:bg-pr-navy-hover">
+            <Button asChild size="sm" className="bg-pr-teal hover:bg-pr-teal-600">
               <a href="/billing">View plans</a>
             </Button>
           </div>
