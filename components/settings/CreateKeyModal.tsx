@@ -117,7 +117,7 @@ export function CreateKeyModal({ planScopes, onCreated, onClose }: Props) {
                   onClick={() => setEnvironment(env)}
                   className={`flex-1 rounded-md border py-1.5 text-xs capitalize transition-colors ${
                     environment === env
-                      ? 'border-pr-navy bg-pr-navy text-white'
+                      ? 'border-pr-teal bg-pr-teal text-white'
                       : 'bg-background text-muted-foreground hover:bg-muted'
                   }`}
                 >
@@ -159,7 +159,7 @@ export function CreateKeyModal({ planScopes, onCreated, onClose }: Props) {
                     <label
                       key={scope}
                       className={`flex cursor-pointer items-start gap-2.5 px-3 py-2.5 ${
-                        checked ? 'bg-pr-teal-light' : 'bg-background'
+                        checked ? 'bg-pr-teal-tint' : 'bg-background'
                       }`}
                     >
                       <input
@@ -190,7 +190,7 @@ export function CreateKeyModal({ planScopes, onCreated, onClose }: Props) {
           )}
 
           <div className="flex gap-2">
-            <Button onClick={handleCreate} disabled={loading} className="flex-1 bg-pr-navy hover:bg-pr-navy-hover">
+            <Button onClick={handleCreate} disabled={loading} className="flex-1 bg-pr-teal hover:bg-pr-teal-600">
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {loading ? 'Creating…' : 'Create key'}
             </Button>
