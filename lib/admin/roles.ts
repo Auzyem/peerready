@@ -9,3 +9,8 @@ export type Role = (typeof ROLES)[number]
 export function isAdminRole(role: string): boolean {
   return (ROLES as readonly string[]).includes(role)
 }
+
+/** The role that bypasses plan-based feature gates (e.g. the API-key plan gate). */
+export function isSuperAdminRole(role: string): boolean {
+  return role === 'super_admin'
+}
