@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateApiKey } from '@/lib/apiKeys/generator'
-import type { ApiKeyScope } from '@/lib/types'
+import { isSuperAdminRole } from '@/lib/admin/roles'
+import { API_KEY_SCOPES, type ApiKeyScope } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,43 +61,55 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'At least one scope is required' }, { status: 400 })
     }
 
-    // ── Plan gate ───────────────────────────────────────────────────────────
-    const { data: sub } = await supabase
-      .from('subscriptions')
-      .select('plan_id, plans(api_access, max_api_keys, allowed_scopes)')
-      .eq('user_id', user.id)
-      .single()
+    // ── Plan gate (super admins bypass entirely) ───────────────────────────────
+    const { data: roleRows } = await supabase.from('user_roles').select('role').eq('user_id', user.id)
+    const isSuperAdmin = (roleRows ?? []).some((r) => isSuperAdminRole(r.role))
 
-    const plan = sub?.plans as unknown as
-      | { api_access: boolean; max_api_keys: number; allowed_scopes: string[] | null }
-      | null
+    let allowedScopes: string[]
+    let maxApiKeys: number
 
-    if (!plan?.api_access) {
-      return NextResponse.json(
-        { error: 'API keys require a Starter plan or above', upgradeUrl: '/billing' },
-        { status: 403 }
-      )
+    if (isSuperAdmin) {
+      allowedScopes = Object.keys(API_KEY_SCOPES)
+      maxApiKeys = -1
+    } else {
+      const { data: sub } = await supabase
+        .from('subscriptions')
+        .select('plan_id, plans(api_access, max_api_keys, allowed_scopes)')
+        .eq('user_id', user.id)
+        .single()
+
+      const plan = sub?.plans as unknown as
+        | { api_access: boolean; max_api_keys: number; allowed_scopes: string[] | null }
+        | null
+
+      if (!plan?.api_access) {
+        return NextResponse.json(
+          { error: 'API keys require a Starter plan or above', upgradeUrl: '/billing' },
+          { status: 403 }
+        )
+      }
+
+      allowedScopes = plan.allowed_scopes ?? []
+      maxApiKeys = plan.max_api_keys
     }
 
-    if (plan.max_api_keys !== -1) {
+    if (maxApiKeys !== -1) {
       const { count } = await supabase
         .from('api_keys')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .eq('revoked', false)
 
-      if ((count ?? 0) >= plan.max_api_keys) {
+      if ((count ?? 0) >= maxApiKeys) {
         return NextResponse.json(
           {
-            error: `Your plan allows a maximum of ${plan.max_api_keys} API keys. Delete an existing key or upgrade your plan.`,
+            error: `Your plan allows a maximum of ${maxApiKeys} API keys. Delete an existing key or upgrade your plan.`,
             upgradeUrl: '/billing',
           },
           { status: 429 }
         )
       }
     }
-
-    const allowedScopes: string[] = plan.allowed_scopes ?? []
     const forbiddenScopes = scopes.filter((s) => !allowedScopes.includes(s))
     if (forbiddenScopes.length > 0) {
       return NextResponse.json(

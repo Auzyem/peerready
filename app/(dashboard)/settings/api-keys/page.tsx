@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Plus, Copy, Trash2, AlertTriangle, CheckCircle2, Key } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import type { ApiKey, ApiKeyScope } from '@/lib/types'
+import { API_KEY_SCOPES, type ApiKey, type ApiKeyScope } from '@/lib/types'
 import { CreateKeyModal } from '@/components/settings/CreateKeyModal'
 
 export default function ApiKeysPage() {
@@ -27,6 +27,11 @@ export default function ApiKeysPage() {
       fetch('/api/billing/plans').then((r) => r.json()),
       fetch('/api/billing/current').then((r) => r.json()),
     ])
+    if (current.isSuperAdmin) {
+      setPlanScopes(Object.keys(API_KEY_SCOPES) as ApiKeyScope[])
+      setMaxKeys(-1)
+      return
+    }
     const plan = plans?.find((p: { id: string }) => p.id === current.plan)
     if (plan) {
       setPlanScopes(plan.allowed_scopes ?? [])
