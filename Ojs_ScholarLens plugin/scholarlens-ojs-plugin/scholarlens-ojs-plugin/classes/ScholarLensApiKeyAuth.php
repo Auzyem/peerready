@@ -1,31 +1,31 @@
 <?php
 
 /**
- * PeerReadyApiKeyAuth.php
+ * ScholarLensApiKeyAuth.php
  *
  * Middleware for validating API key authentication on the
- * PeerReady callback endpoint (/api/v1/peerready/review-complete/*).
+ * ScholarLens callback endpoint (/api/v1/scholarlens/review-complete/*).
  *
- * PeerReady sends: Authorization: Bearer <apiKey>
+ * ScholarLens sends: Authorization: Bearer <apiKey>
  * This middleware compares it to the key stored in the plugin settings.
  *
- * Usage — add to PeerReadyApiHandler before processing any callback:
+ * Usage — add to ScholarLensApiHandler before processing any callback:
  *
- *   use APP\plugins\generic\peerready\classes\PeerReadyApiKeyAuth;
+ *   use APP\plugins\generic\scholarlens\classes\ScholarLensApiKeyAuth;
  *
- *   $auth = new PeerReadyApiKeyAuth($contextId);
+ *   $auth = new ScholarLensApiKeyAuth($contextId);
  *   if (!$auth->validate($request->getHeaderLine('Authorization'))) {
  *       return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);
  *   }
  *
- * Directory: plugins/generic/peerready/classes/PeerReadyApiKeyAuth.php
+ * Directory: plugins/generic/scholarlens/classes/ScholarLensApiKeyAuth.php
  */
 
-namespace APP\plugins\generic\peerready\classes;
+namespace APP\plugins\generic\scholarlens\classes;
 
 use PKP\plugins\PluginRegistry;
 
-class PeerReadyApiKeyAuth
+class ScholarLensApiKeyAuth
 {
     private int $contextId;
 
@@ -50,8 +50,8 @@ class PeerReadyApiKeyAuth
             return false;
         }
 
-        $plugin     = PluginRegistry::getPlugin('generic', 'peerreadyplugin');
-        $storedKey  = $plugin ? $plugin->getSetting($this->contextId, 'peerreadyApiKey') : null;
+        $plugin     = PluginRegistry::getPlugin('generic', 'scholarlensplugin');
+        $storedKey  = $plugin ? $plugin->getSetting($this->contextId, 'scholarlensApiKey') : null;
 
         if (empty($storedKey)) {
             return false;

@@ -111,7 +111,7 @@ export function Template2PDFDocument({ session, priorSession, generatedAt }: {
   const unresolvedCount = critiques.length - resolvedCount - partialCount
 
   return (
-    <Document title={`PeerReady Review 2 — ${title}`} author="PeerReady AI">
+    <Document title={`ScholarLens Review 2 — ${title}`} author="ScholarLens AI">
       {/* PAGE 1 */}
       <Page size="A4" style={s.page}>
         <View style={s.headerWrap}>
@@ -176,7 +176,7 @@ export function Template2PDFDocument({ session, priorSession, generatedAt }: {
         </View>
 
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>PeerReady · Review 2 · {title}</Text>
+          <Text style={s.footerText}>ScholarLens · Review 2 · {title}</Text>
           <Text style={[s.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
         </View>
       </Page>
@@ -269,7 +269,7 @@ export function Template2PDFDocument({ session, priorSession, generatedAt }: {
         </View>
 
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>PeerReady · Review 2 · {title}</Text>
+          <Text style={s.footerText}>ScholarLens · Review 2 · {title}</Text>
           <Text style={[s.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
         </View>
       </Page>

@@ -1,8 +1,8 @@
-# PeerReady — Review Sequencing (Phase 2) Design
+# ScholarLens — Review Sequencing (Phase 2) Design
 
 **Date:** 2026-06-01
 **Status:** Approved (design), pending implementation plan
-**Source:** `peerready-v2-upgrade-prompt.md` UPGRADE 1 (review sequencing) + UPGRADE 6 (stages API), reconciled against the live codebase. Deferred from V2 Phase 1.
+**Source:** `scholarlens-v2-upgrade-prompt.md` UPGRADE 1 (review sequencing) + UPGRADE 6 (stages API), reconciled against the live codebase. Deferred from V2 Phase 1.
 
 ## Context
 
@@ -75,7 +75,7 @@ sessions via a new read-only API. The only write-side change is recording progre
 
 ### PDF
 - **`app/api/pdf/[sessionId]/route.ts`** — add `version_number` to the `drafts(...)` select.
-- **`lib/pdf/ReviewReport.tsx`** — header shows "PeerReady — Review N" when a version is present
+- **`lib/pdf/ReviewReport.tsx`** — header shows "ScholarLens — Review N" when a version is present
   (falls back to "Review report"). `ReviewPdfProps.session.drafts` gains `version_number?: number`.
 
 ## Data flow

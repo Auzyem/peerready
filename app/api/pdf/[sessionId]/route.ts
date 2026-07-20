@@ -72,7 +72,7 @@ export async function GET(
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="peerready-review-${safeId}.pdf"`,
+        'Content-Disposition': `inline; filename="scholarlens-review-${safeId}.pdf"`,
       },
     })
   } catch (error: unknown) {

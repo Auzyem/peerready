@@ -1,21 +1,21 @@
-# PeerReady Vertical Slice Implementation Plan
+# ScholarLens Vertical Slice Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the first end-to-end PeerReady path — a user uploads a manuscript, it is parsed and stored, a Claude pipeline (discipline routing → deep review) scores it, and the dashboard shows verdict, scores, and annotations — verified locally against real Supabase + Anthropic.
+**Goal:** Build the first end-to-end ScholarLens path — a user uploads a manuscript, it is parsed and stored, a Claude pipeline (discipline routing → deep review) scores it, and the dashboard shows verdict, scores, and annotations — verified locally against real Supabase + Anthropic.
 
 **Architecture:** Next.js 14 App Router. User-facing API routes use the cookie-bound Supabase server client so RLS applies. The review pipeline runs detached via `waitUntil` and uses a server-only service-role client to persist results. Parsers and AI prompt modules are pure, independently testable units.
 
 **Tech Stack:** Next.js 14, TypeScript, Tailwind + shadcn/ui, Supabase (Postgres/Auth/Storage), Anthropic SDK (`claude-sonnet-4-20250514`), `pdf-parse`, `mammoth`, `@vercel/functions`, Vitest.
 
-**Working directory:** `C:\Users\emm24\dev\Claude\peerready` (git already initialized, `main` branch).
+**Working directory:** `C:\Users\emm24\dev\Claude\scholarlens` (git already initialized, `main` branch).
 
 ---
 
 ## File Structure
 
 ```
-peerready/
+scholarlens/
   app/
     layout.tsx                                  root layout
     globals.css
@@ -78,7 +78,7 @@ The directory already exists with `docs/` and `.git`. Scaffold in place.
 
 Run:
 ```bash
-cd "C:/Users/emm24/dev/Claude/peerready"
+cd "C:/Users/emm24/dev/Claude/scholarlens"
 npx create-next-app@14 . --ts --tailwind --eslint --app --src-dir=false --import-alias "@/*" --no-turbopack
 ```
 Expected: prompts to proceed in a non-empty dir → yes. Creates `app/`, `next.config.mjs` (we replace with `.js`), `tsconfig.json`, `tailwind.config.ts`, `package.json`.
@@ -1573,7 +1573,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-sm p-6">
-        <h1 className="mb-4 text-xl font-semibold">Log in to PeerReady</h1>
+        <h1 className="mb-4 text-xl font-semibold">Log in to ScholarLens</h1>
         <form onSubmit={handleLogin} className="space-y-3">
           <input className="w-full rounded border p-2" type="email" placeholder="Email"
             value={email} onChange={e => setEmail(e.target.value)} required />
@@ -1630,7 +1630,7 @@ export default function SignupPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-sm p-6">
-        <h1 className="mb-4 text-xl font-semibold">Create your PeerReady account</h1>
+        <h1 className="mb-4 text-xl font-semibold">Create your ScholarLens account</h1>
         <form onSubmit={handleSignup} className="space-y-3">
           <input className="w-full rounded border p-2" placeholder="Full name"
             value={fullName} onChange={e => setFullName(e.target.value)} />
@@ -1678,7 +1678,7 @@ import { FileText, LayoutDashboard } from 'lucide-react'
 export function Sidebar() {
   return (
     <aside className="w-56 shrink-0 border-r bg-muted/30 p-4">
-      <div className="mb-6 text-lg font-bold">PeerReady</div>
+      <div className="mb-6 text-lg font-bold">ScholarLens</div>
       <nav className="space-y-1 text-sm">
         <Link href="/dashboard" className="flex items-center gap-2 rounded px-2 py-2 hover:bg-muted">
           <LayoutDashboard className="h-4 w-4" /> Dashboard
@@ -1754,7 +1754,7 @@ import { Button } from '@/components/ui/button'
 export default function DashboardPage() {
   return (
     <div>
-      <h1 className="mb-2 text-2xl font-semibold">Welcome to PeerReady</h1>
+      <h1 className="mb-2 text-2xl font-semibold">Welcome to ScholarLens</h1>
       <p className="mb-4 text-muted-foreground">Upload a manuscript to get an AI peer review.</p>
       <Link href="/manuscripts/new"><Button>New review</Button></Link>
     </div>

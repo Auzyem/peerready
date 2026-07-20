@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 14 App Router, TypeScript, Tailwind + shadcn, `next-themes`, Vitest (node).
 
-**Source spec:** `docs/superpowers/specs/2026-06-01-peerready-brand-foundation-design.md`.
+**Source spec:** `docs/superpowers/specs/2026-06-01-scholarlens-brand-foundation-design.md`.
 
 **House rules:** gate every commit on `npm run build` (`npm test` is lenient). Branch `feat/design-foundation` (already checked out; spec already committed there).
 
@@ -436,7 +436,7 @@ export function Sidebar({ name, careerStage, plan }: SidebarProps) {
   return (
     <aside className="sticky top-0 flex h-screen w-56 shrink-0 flex-col bg-pr-navy">
       <div className="border-b border-white/[0.08] px-4 pb-4 pt-5">
-        <div className="text-[17px] font-semibold tracking-tight text-white">PeerReady</div>
+        <div className="text-[17px] font-semibold tracking-tight text-white">ScholarLens</div>
         <div className="mt-0.5 text-[11px] text-white/40">AI peer review platform</div>
       </div>
 

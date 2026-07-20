@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 14 App Router, TypeScript, Tailwind/shadcn, Vitest (node).
 
-**Source spec:** `docs/superpowers/specs/2026-06-01-peerready-review-layout-design.md`.
+**Source spec:** `docs/superpowers/specs/2026-06-01-scholarlens-review-layout-design.md`.
 
 **House rules:** gate every commit on `npm run build` (`npm test` is lenient). Branch `feat/review-layout` (already checked out; spec committed there).
 

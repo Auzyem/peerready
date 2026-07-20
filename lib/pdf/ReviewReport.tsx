@@ -84,7 +84,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
   const v = verdictStyle(session.verdict ?? '')
   const title = session.drafts?.manuscripts?.title ?? 'Untitled manuscript'
   const reviewNumber = session.drafts?.version_number
-  const headerTitle = reviewNumber ? `PeerReady — Review ${reviewNumber}` : 'PeerReady — Review report'
+  const headerTitle = reviewNumber ? `ScholarLens — Review ${reviewNumber}` : 'ScholarLens — Review report'
   const scores = session.scores ?? []
   const annotations = session.annotations ?? []
   const critiques = session.adversarial_critiques ?? []
@@ -93,7 +93,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
   const delta = session.score_delta
 
   return (
-    <Document title={`PeerReady Review — ${title}`} author="PeerReady AI">
+    <Document title={`ScholarLens Review — ${title}`} author="ScholarLens AI">
       {/* PAGE 1: OVERVIEW */}
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
@@ -167,7 +167,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
         </View>
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>PeerReady · Review report · {title}</Text>
+          <Text style={styles.footerText}>ScholarLens · Review report · {title}</Text>
           <Text style={[styles.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
         </View>
       </Page>
@@ -203,7 +203,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
             ))}
           </View>
           <View style={styles.footer} fixed>
-            <Text style={styles.footerText}>PeerReady · Adversarial review · {title}</Text>
+            <Text style={styles.footerText}>ScholarLens · Adversarial review · {title}</Text>
             <Text style={[styles.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
           </View>
         </Page>
@@ -242,7 +242,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
             })}
           </View>
           <View style={styles.footer} fixed>
-            <Text style={styles.footerText}>PeerReady · Journal targets · {title}</Text>
+            <Text style={styles.footerText}>ScholarLens · Journal targets · {title}</Text>
             <Text style={[styles.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
           </View>
         </Page>
@@ -283,7 +283,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
             ) : null}
           </View>
           <View style={styles.footer} fixed>
-            <Text style={styles.footerText}>PeerReady · Progress report · {title}</Text>
+            <Text style={styles.footerText}>ScholarLens · Progress report · {title}</Text>
             <Text style={[styles.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
           </View>
         </Page>

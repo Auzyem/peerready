@@ -5,7 +5,7 @@ export type KeyEnvironment = 'live' | 'test'
 
 /**
  * Generates a new API key. Returns both the plaintext (shown to the user once)
- * and the bcrypt hash (stored in the DB). Format: pr_live_[32 url-safe chars].
+ * and the bcrypt hash (stored in the DB). Format: sl_live_[32 url-safe chars].
  * The key is well under bcrypt's 72-byte input limit.
  */
 export async function generateApiKey(environment: KeyEnvironment = 'live'): Promise<{

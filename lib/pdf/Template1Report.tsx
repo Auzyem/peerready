@@ -165,7 +165,7 @@ export function Template1PDFDocument({ session, generatedAt }: T1Props) {
   const majorRevisions = critiques.filter(c => c.severity === 'critical' || c.severity === 'major')
 
   return (
-    <Document title={`PeerReady Review 1 — ${title}`} author="PeerReady AI">
+    <Document title={`ScholarLens Review 1 — ${title}`} author="ScholarLens AI">
       {/* PAGE 1 — HEADER + METADATA + SCORING */}
       <Page size="A4" style={s.page}>
         <View style={s.headerWrap}>
@@ -208,7 +208,7 @@ export function Template1PDFDocument({ session, generatedAt }: T1Props) {
         </View>
 
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>PeerReady · Review 1 · {title}</Text>
+          <Text style={s.footerText}>ScholarLens · Review 1 · {title}</Text>
           <Text style={[s.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
         </View>
       </Page>
@@ -297,7 +297,7 @@ export function Template1PDFDocument({ session, generatedAt }: T1Props) {
         </View>
 
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>PeerReady · Review 1 · {title}</Text>
+          <Text style={s.footerText}>ScholarLens · Review 1 · {title}</Text>
           <Text style={[s.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
         </View>
       </Page>

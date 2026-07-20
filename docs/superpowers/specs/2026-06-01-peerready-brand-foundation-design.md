@@ -1,9 +1,9 @@
 
-# PeerReady — Brand Foundation + Sidebar (Phase 3) Design
+# ScholarLens — Brand Foundation + Sidebar (Phase 3) Design
 
 **Date:** 2026-06-01
 **Status:** Approved (design), pending implementation plan
-**Source:** `peerready-v2-upgrade-prompt.md` UPGRADE 1 (design system) + UPGRADE 2 (sidebar), adapted to the codebase's Tailwind/shadcn idiom (the spec shipped inline styles + raw CSS variables). First slice of the deferred design-system cycle.
+**Source:** `scholarlens-v2-upgrade-prompt.md` UPGRADE 1 (design system) + UPGRADE 2 (sidebar), adapted to the codebase's Tailwind/shadcn idiom (the spec shipped inline styles + raw CSS variables). First slice of the deferred design-system cycle.
 
 ## Context
 
@@ -61,7 +61,7 @@ navy across themes; `next-themes` owns theme state.
 
 ### 2. Sidebar (navy, treatment A)
 - **`components/layout/Sidebar.tsx`** → **client component** (`'use client'`, `usePathname`).
-  - Navy (`pr-navy`) rail, Inter, logo block ("PeerReady" / "AI peer review platform").
+  - Navy (`pr-navy`) rail, Inter, logo block ("ScholarLens" / "AI peer review platform").
   - Sections: **Workspace** → Dashboard (`/dashboard`), Manuscripts (`/manuscripts`);
     **Account** → Settings (`/settings`), Billing (`/billing`).
   - Active item (matched via `pathname.startsWith(href)`): teal left-bar + lifted translucent

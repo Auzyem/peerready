@@ -35,12 +35,12 @@ export async function validateApiKey(
 
   if (!plainKey || !plainKey.startsWith('pr_')) {
     return NextResponse.json(
-      { error: 'Missing or malformed API key. Send as: Authorization: Bearer pr_live_...' },
+      { error: 'Missing or malformed API key. Send as: Authorization: Bearer sl_live_...' },
       { status: 401 }
     )
   }
 
-  const keyPrefix = plainKey.startsWith('pr_test_') ? 'pr_test_' : 'pr_live_'
+  const keyPrefix = plainKey.startsWith('sl_test_') ? 'sl_test_' : 'sl_live_'
   const keySuffix = plainKey.slice(-4)
 
   const admin = createAdminClient()

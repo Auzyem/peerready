@@ -10,14 +10,14 @@
 
 **Spec:** `docs/superpowers/specs/2026-05-30-adversarial-critique-design.md`
 
-**Working directory:** `C:\Users\emm24\dev\Claude\peerready` (branch `build/vertical-slice`).
+**Working directory:** `C:\Users\emm24\dev\Claude\scholarlens` (branch `build/vertical-slice`).
 
 ---
 
 ## File Structure
 
 ```
-peerready/
+scholarlens/
   supabase/migrations/002_adversarial_status.sql   NEW  adversarial_status + adversarial_summary columns
   lib/types/index.ts                               MOD  +2 ReviewSession fields, +AdversarialReviewerResult
   lib/ai/prompts/adversarialReviewer.ts            NEW  buildPriorReviewContext (pure) + runAdversarialReviewer

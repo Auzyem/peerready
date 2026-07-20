@@ -1,8 +1,8 @@
-# PeerReady — Review-Page Vertical-Nav Layout (Phase 4) Design
+# ScholarLens — Review-Page Vertical-Nav Layout (Phase 4) Design
 
 **Date:** 2026-06-01
 **Status:** Approved (design), pending implementation plan
-**Source:** `peerready-v2-upgrade-prompt.md` UPGRADE 3 (vertical section nav) + UPGRADE 5 (layout assembly), adapted to the codebase (spec shipped inline styles + a different data model). Final slice of the design-system cycle.
+**Source:** `scholarlens-v2-upgrade-prompt.md` UPGRADE 3 (vertical section nav) + UPGRADE 5 (layout assembly), adapted to the codebase (spec shipped inline styles + a different data model). Final slice of the design-system cycle.
 
 ## Context
 

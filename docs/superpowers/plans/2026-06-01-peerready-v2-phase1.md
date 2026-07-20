@@ -1,14 +1,14 @@
-# PeerReady V2 — Phase 1 (Additive) Implementation Plan
+# ScholarLens V2 — Phase 1 (Additive) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add PDF review reports, a SaaS plan/subscription scaffold, and a full Stripe billing integration to PeerReady — additively, without changing existing free-user behavior.
+**Goal:** Add PDF review reports, a SaaS plan/subscription scaffold, and a full Stripe billing integration to ScholarLens — additively, without changing existing free-user behavior.
 
 **Architecture:** New Supabase migrations (`006`, `007`) add `plans`/`subscriptions`/`user_roles`/`billing_events`. A `@react-pdf/renderer` document renders completed review sessions to PDF via a new `GET /api/pdf/[sessionId]` route, surfaced by a Tailwind modal wired into the existing `ReviewDashboard`. Stripe checkout/portal/webhook routes sync subscription state to Supabase. A passive plan-gate library + `UpgradePrompt` component are built but **not** wired into existing routes this cycle.
 
 **Tech Stack:** Next.js 14 App Router, TypeScript, Supabase (SSR + service-role), Tailwind + shadcn, `@react-pdf/renderer`, `date-fns`, `stripe`, `@stripe/stripe-js`, Vitest (node).
 
-**Source spec:** `docs/superpowers/specs/2026-06-01-peerready-v2-phase1-design.md`. Original upgrade prompt: `c:\Users\emm24\Downloads\peerready-v2-upgrade-prompt.md`.
+**Source spec:** `docs/superpowers/specs/2026-06-01-scholarlens-v2-phase1-design.md`. Original upgrade prompt: `c:\Users\emm24\Downloads\scholarlens-v2-upgrade-prompt.md`.
 
 **House rules (from project memory):**
 - Gate every commit on `npm run build` (`npm test` is lenient — never rely on it alone).
@@ -637,12 +637,12 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
   const delta = session.score_delta
 
   return (
-    <Document title={`PeerReady Review — ${title}`} author="PeerReady AI">
+    <Document title={`ScholarLens Review — ${title}`} author="ScholarLens AI">
       {/* PAGE 1: OVERVIEW */}
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Text style={styles.headerTitle}>PeerReady — Review report</Text>
+            <Text style={styles.headerTitle}>ScholarLens — Review report</Text>
             <Text style={styles.headerSub}>{title}</Text>
             <Text style={[styles.headerSub, { marginTop: 4 }]}>Generated {generatedAt}</Text>
           </View>
@@ -711,7 +711,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
         </View>
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>PeerReady · Review report · {title}</Text>
+          <Text style={styles.footerText}>ScholarLens · Review report · {title}</Text>
           <Text style={[styles.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
         </View>
       </Page>
@@ -747,7 +747,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
             ))}
           </View>
           <View style={styles.footer} fixed>
-            <Text style={styles.footerText}>PeerReady · Adversarial review · {title}</Text>
+            <Text style={styles.footerText}>ScholarLens · Adversarial review · {title}</Text>
             <Text style={[styles.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
           </View>
         </Page>
@@ -786,7 +786,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
             })}
           </View>
           <View style={styles.footer} fixed>
-            <Text style={styles.footerText}>PeerReady · Journal targets · {title}</Text>
+            <Text style={styles.footerText}>ScholarLens · Journal targets · {title}</Text>
             <Text style={[styles.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
           </View>
         </Page>
@@ -827,7 +827,7 @@ export function ReviewPDFDocument({ session, generatedAt }: ReviewPdfProps) {
             ) : null}
           </View>
           <View style={styles.footer} fixed>
-            <Text style={styles.footerText}>PeerReady · Progress report · {title}</Text>
+            <Text style={styles.footerText}>ScholarLens · Progress report · {title}</Text>
             <Text style={[styles.footerText, { textAlign: 'right' }]} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
           </View>
         </Page>
@@ -949,7 +949,7 @@ export async function GET(
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename="peerready-review-${safeId}.pdf"`,
+      'Content-Disposition': `inline; filename="scholarlens-review-${safeId}.pdf"`,
     },
   })
 }
@@ -1020,7 +1020,7 @@ export function PdfReportModal({ sessionId, manuscriptTitle, onClose }: Props) {
     if (!pdfUrl) return
     const a = document.createElement('a')
     a.href = pdfUrl
-    a.download = `peerready-review-${sessionId}.pdf`
+    a.download = `scholarlens-review-${sessionId}.pdf`
     a.click()
   }
 
@@ -1827,7 +1827,7 @@ Run: `npm run dev`, then verify:
 
 ```bash
 git add -A
-git commit -m "chore: PeerReady V2 Phase 1 verification pass"
+git commit -m "chore: ScholarLens V2 Phase 1 verification pass"
 ```
 
 ---

@@ -1,6 +1,6 @@
-# Deploying PeerReady to Vercel
+# Deploying ScholarLens to Vercel
 
-A step-by-step guide to deploy PeerReady (Next.js 14 + Supabase + Anthropic) to
+A step-by-step guide to deploy ScholarLens (Next.js 14 + Supabase + Anthropic) to
 Vercel from scratch. Follow the sections in order.
 
 ---
@@ -52,9 +52,9 @@ project restart does **not** fix this — only the exposed-schemas setting does.
 
 **1.4 — Configure Auth URLs for production.** Supabase → **Authentication → URL
 Configuration**:
-- **Site URL** → your Vercel production domain (e.g. `https://peerready.vercel.app`).
+- **Site URL** → your Vercel production domain (e.g. `https://scholarlens.vercel.app`).
   You can set a placeholder now and update it after step 3 once you know the domain.
-- **Redirect URLs** → add `https://peerready.vercel.app/**` and, for preview
+- **Redirect URLs** → add `https://scholarlens.vercel.app/**` and, for preview
   deployments, `https://*.vercel.app/**`.
 - For **email confirmation**: **Authentication → Providers → Email** — enable
   "Confirm email" for production (or leave it off for quick testing). If it's on,
@@ -70,7 +70,7 @@ Configuration**:
 ## 2. Create the Vercel project
 
 1. Go to **vercel.com → Add New… → Project**.
-2. **Import** the PeerReady Git repository (authorize GitHub if prompted).
+2. **Import** the ScholarLens Git repository (authorize GitHub if prompted).
 3. Vercel auto-detects **Next.js**. Leave the defaults:
    - **Framework Preset:** Next.js
    - **Build Command:** `next build` (default)
@@ -84,7 +84,7 @@ Configuration**:
 
 ## 3. Add environment variables
 
-PeerReady reads exactly these. Required unless noted:
+ScholarLens reads exactly these. Required unless noted:
 
 | Variable | Required | Secret? | Purpose |
 |----------|:--------:|:-------:|---------|
@@ -118,7 +118,7 @@ select the environments, **Save**.
 - If you added env vars before the first deploy: click **Deploy** on the import
   screen (or trigger a deploy from the Deployments tab).
 - Vercel builds (`next build`) and gives you a URL like
-  `https://peerready-xxxx.vercel.app`.
+  `https://scholarlens-xxxx.vercel.app`.
 
 **CLI alternative** (optional):
 ```bash

@@ -1,6 +1,6 @@
-# PeerReady
+# ScholarLens
 
-AI-powered peer review for academic manuscripts. Upload a paper (PDF or DOCX) and PeerReady
+AI-powered peer review for academic manuscripts. Upload a paper (PDF or DOCX) and ScholarLens
 routes it to a discipline-appropriate reviewer persona, runs a rigorous Claude-based review,
 and returns a structured verdict, eight scored quality dimensions, inline annotations — and,
 on demand, a harsher adversarial "Reviewer 2" critique that escalates the weaknesses a polite

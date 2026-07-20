@@ -70,7 +70,7 @@ export default function Home() {
               Know what reviewers will say — before you submit.
             </h1>
             <p className="mt-4 text-lg text-pr-body">
-              Upload your paper and PeerReady runs a rigorous, discipline-aware review: eight scored
+              Upload your paper and ScholarLens runs a rigorous, discipline-aware review: eight scored
               dimensions, inline annotations, an adversarial &ldquo;Reviewer 2&rdquo; pass, and a
               ranked shortlist of journals to target.
             </p>
@@ -165,7 +165,7 @@ export default function Home() {
               Get started free <ArrowRight className="h-4 w-4" />
             </Link>
             <a
-              href="mailto:hello@peerready.app"
+              href="mailto:hello@scholarlens.ac"
               className="inline-flex items-center gap-2 rounded-md border border-white/30 px-5 py-3 font-medium text-white hover:bg-white/10"
             >
               <Mail className="h-4 w-4" /> Contact us
@@ -176,11 +176,11 @@ export default function Home() {
 
       <footer className="border-t">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-8 text-sm text-pr-muted sm:flex-row">
-          <span>© {new Date().getFullYear()} PeerReady</span>
+          <span>© {new Date().getFullYear()} ScholarLens</span>
           <div className="flex gap-4">
             <Link href="/login" className="hover:text-pr-navy">Log in</Link>
             <Link href="/signup" className="hover:text-pr-navy">Sign up</Link>
-            <a href="mailto:hello@peerready.app" className="hover:text-pr-navy">Contact</a>
+            <a href="mailto:hello@scholarlens.ac" className="hover:text-pr-navy">Contact</a>
           </div>
         </div>
       </footer>
