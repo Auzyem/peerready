@@ -1,28 +1,28 @@
 <?php
 
 /**
- * PeerReadyApiHandler.php
+ * ScholarLensApiHandler.php
  *
- * REST API handler for PeerReady callbacks into OJS.
+ * REST API handler for ScholarLens callbacks into OJS.
  *
  * Endpoints exposed:
  *
  *   POST /index.php/{contextPath}/api/v1/peerready/review-complete/{submissionId}
- *     Called by PeerReady when the AI review pipeline completes.
+ *     Called by ScholarLens when the AI review pipeline completes.
  *     Body (JSON):
- *       sessionId    string  — PeerReady review session ID
+ *       sessionId    string  — ScholarLens review session ID
  *       verdict      string  — 'accept' | 'minor_revision' | 'major_revision' | 'reject'
  *       overallScore int     — Total score (0-80 for 8-dimension rubric)
  *       summaryNote  string  — Plain-text summary for editorial note
- *       reportUrl    string  — URL to the full PeerReady review dashboard
+ *       reportUrl    string  — URL to the full ScholarLens review dashboard
  *     Response: 200 {"ok": true}
  *
  *   GET /index.php/{contextPath}/api/v1/peerready/status/{submissionId}
- *     Returns the current PeerReady review status for a submission.
+ *     Returns the current ScholarLens review status for a submission.
  *     Used by the OJS sidebar button to show live status.
  *     Response: 200 {"status": "reviewing"|"complete"|"failed", "sessionId": "...", "reportUrl": "..."}
  *
- * Directory: plugins/generic/peerready/api/v1/peerready/PeerReadyApiHandler.php
+ * Directory: plugins/generic/peerready/api/v1/peerready/ScholarLensApiHandler.php
  *
  * Security:
  *   review-complete: validates a shared webhook secret in the Authorization header.
@@ -36,7 +36,7 @@ use PKP\security\authorization\ContextAccessPolicy;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class PeerReadyApiHandler extends APIHandler
+class ScholarLensApiHandler extends APIHandler
 {
     public function __construct()
     {
@@ -67,7 +67,7 @@ class PeerReadyApiHandler extends APIHandler
     // ─────────────────────────────────────────────
 
     /**
-     * PeerReady posts here when the review pipeline completes.
+     * ScholarLens posts here when the review pipeline completes.
      *
      * Validates the webhook secret, then:
      *  - Updates the OJS submission settings (status, verdict, score)
@@ -128,7 +128,7 @@ class PeerReadyApiHandler extends APIHandler
     // ─────────────────────────────────────────────
 
     /**
-     * Returns the current PeerReady review status for the OJS sidebar.
+     * Returns the current ScholarLens review status for the OJS sidebar.
      */
     public function getStatus(Request $slimRequest, Response $response, array $args): Response
     {
@@ -159,7 +159,7 @@ class PeerReadyApiHandler extends APIHandler
     // ─────────────────────────────────────────────
 
     /**
-     * Creates an internal OJS editorial discussion note with the PeerReady summary.
+     * Creates an internal OJS editorial discussion note with the ScholarLens summary.
      * The note appears in the Submission workflow > Review stage > Discussions panel.
      */
     private function createDiscussionNote($submission, string $summaryNote, string $verdict, int $score, string $reportUrl): void
@@ -176,7 +176,7 @@ class PeerReadyApiHandler extends APIHandler
             ];
             $verdictLabel = $verdictLabels[$verdict] ?? ucfirst($verdict);
 
-            $noteBody = "PeerReady AI Review completed.\n\n"
+            $noteBody = "ScholarLens AI Review completed.\n\n"
                 . "Verdict: {$verdictLabel}\n"
                 . "Overall Score: {$score}/80\n\n"
                 . $summaryNote . "\n\n"
@@ -200,16 +200,16 @@ class PeerReadyApiHandler extends APIHandler
             $note->setUserId($request->getUser() ? $request->getUser()->getId() : 1);
             $note->setDateCreated(\Core::getCurrentDate());
             $note->setDateModified(\Core::getCurrentDate());
-            $note->setTitle('PeerReady AI Review — ' . $verdictLabel);
+            $note->setTitle('ScholarLens AI Review — ' . $verdictLabel);
             $note->setContents($noteBody);
             $noteDao->insertObject($note);
         } catch (\Throwable $e) {
-            error_log('[PeerReady] Failed to create discussion note: ' . $e->getMessage());
+            error_log('[ScholarLens] Failed to create discussion note: ' . $e->getMessage());
         }
     }
 
     /**
-     * Notifies the assigned editor by email that the PeerReady review is complete.
+     * Notifies the assigned editor by email that the ScholarLens review is complete.
      */
     private function notifyEditor($submission, string $verdict, int $score, string $reportUrl): void
     {
@@ -251,7 +251,7 @@ class PeerReadyApiHandler extends APIHandler
                 $mail->send();
             }
         } catch (\Throwable $e) {
-            error_log('[PeerReady] Failed to send editor notification: ' . $e->getMessage());
+            error_log('[ScholarLens] Failed to send editor notification: ' . $e->getMessage());
         }
     }
 }

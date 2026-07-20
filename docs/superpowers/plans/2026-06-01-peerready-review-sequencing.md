@@ -534,11 +534,11 @@ In `lib/pdf/ReviewReport.tsx`, inside `ReviewPDFDocument`, find this line:
 Add immediately after it:
 ```tsx
   const reviewNumber = session.drafts?.version_number
-  const headerTitle = reviewNumber ? `PeerReady — Review ${reviewNumber}` : 'PeerReady — Review report'
+  const headerTitle = reviewNumber ? `ScholarLens — Review ${reviewNumber}` : 'ScholarLens — Review report'
 ```
 Then find the Page 1 header line:
 ```tsx
-            <Text style={styles.headerTitle}>PeerReady — Review report</Text>
+            <Text style={styles.headerTitle}>ScholarLens — Review report</Text>
 ```
 Replace it with:
 ```tsx
@@ -581,7 +581,7 @@ Run: `npm run dev`. With a manuscript that has two drafts each reviewed:
 - The review page for the v2 session shows a **"Review 2"** label and a two-chip tracker ("Review 1 → Review 2", current highlighted); clicking "Review 1" navigates to that session.
 - A manuscript with a single draft shows **no** tracker and a "Review 1" label.
 - The Progress tab still renders (the v2 session has `score_delta`), and the v2 session row now has `compared_to_session_id` set to the v1 session.
-- The PDF for the v2 session shows **"PeerReady — Review 2"** in the header.
+- The PDF for the v2 session shows **"ScholarLens — Review 2"** in the header.
 
 - [ ] **Step 4: Final commit (if any stray changes)**
 

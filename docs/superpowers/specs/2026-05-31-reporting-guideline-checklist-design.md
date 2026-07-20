@@ -9,7 +9,7 @@ completeness score.
 
 ## Context
 
-PeerReady already runs a standard review pipeline and two on-demand add-on passes —
+ScholarLens already runs a standard review pipeline and two on-demand add-on passes —
 **Adversarial critique** and **Journal matching**. Both follow an identical shape:
 
 - a `<feature>_status` lifecycle column on `review_sessions`

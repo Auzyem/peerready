@@ -1,4 +1,4 @@
-# PeerReady — Local Setup & Verification
+# ScholarLens — Local Setup & Verification
 
 This is the **vertical slice**: signup/login → create manuscript → upload (PDF/DOCX) →
 parse & store → AI pipeline (discipline routing → deep review) → review dashboard with

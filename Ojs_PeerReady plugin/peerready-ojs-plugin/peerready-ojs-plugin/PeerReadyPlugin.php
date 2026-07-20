@@ -1,16 +1,16 @@
 <?php
 
 /**
- * PeerReadyPlugin.php
+ * ScholarLensPlugin.php
  *
- * PeerReady AI Manuscript Review — OJS Generic Plugin
+ * ScholarLens AI Manuscript Review — OJS Generic Plugin
  * Compatible with OJS 3.3.x and OJS 3.4.x
  *
  * Architecture: Option A (webhook bridge)
  *   1. Hook fires when a new submission is submitted.
- *   2. Plugin POSTs the manuscript file + metadata to PeerReady /api/upload.
- *   3. Plugin stores the PeerReady session_id against the OJS submission.
- *   4. PeerReady calls back to /api/v1/peerready/review-complete when done.
+ *   2. Plugin POSTs the manuscript file + metadata to ScholarLens /api/upload.
+ *   3. Plugin stores the ScholarLens session_id against the OJS submission.
+ *   4. ScholarLens calls back to /api/v1/peerready/review-complete when done.
  *   5. Plugin attaches a discussion note and a sidebar link in OJS.
  *
  * Directory: plugins/generic/peerready/
@@ -24,7 +24,7 @@ use PKP\core\PKPApplication;
 use PKP\db\DAORegistry;
 use APP\core\Application;
 
-class PeerReadyPlugin extends GenericPlugin
+class ScholarLensPlugin extends GenericPlugin
 {
     // ─────────────────────────────────────────────
     // Plugin identity
@@ -59,14 +59,14 @@ class PeerReadyPlugin extends GenericPlugin
             );
 
             // Hook 2: Fires when OJS renders the submission workflow page.
-            // Used to inject the "View PeerReady Report" button into the sidebar.
+            // Used to inject the "View ScholarLens Report" button into the sidebar.
             \HookRegistry::register(
                 'Template::Workflow',
                 [$this, 'injectWorkflowButton']
             );
 
             // Hook 3: Register our custom REST API endpoint.
-            // PeerReady calls POST /api/v1/peerready/review-complete when done.
+            // ScholarLens calls POST /api/v1/peerready/review-complete when done.
             \HookRegistry::register(
                 'LoadHandler',
                 [$this, 'registerApiHandler']
@@ -77,7 +77,7 @@ class PeerReadyPlugin extends GenericPlugin
     }
 
     // ─────────────────────────────────────────────
-    // Hook 1: New submission — trigger PeerReady review
+    // Hook 1: New submission — trigger ScholarLens review
     // ─────────────────────────────────────────────
 
     /**
@@ -97,28 +97,28 @@ class PeerReadyPlugin extends GenericPlugin
         }
 
         try {
-            $this->sendToPeerReady($submission);
+            $this->sendToScholarLens($submission);
         } catch (\Throwable $e) {
             // Log but do not block OJS submission process
-            error_log('[PeerReady] handleNewSubmission error: ' . $e->getMessage());
+            error_log('[ScholarLens] handleNewSubmission error: ' . $e->getMessage());
         }
 
         return false; // false = let OJS continue normally
     }
 
     /**
-     * Upload the manuscript file to PeerReady and start the review.
+     * Upload the manuscript file to ScholarLens and start the review.
      *
      * @param  \APP\submission\Submission  $submission
      */
-    private function sendToPeerReady($submission): void
+    private function sendToScholarLens($submission): void
     {
         $submissionId = $submission->getId();
         $apiBase      = $this->getSetting($submission->getData('contextId'), 'peerreadyApiUrl');
         $apiKey       = $this->getSetting($submission->getData('contextId'), 'peerreadyApiKey');
 
         if (empty($apiBase) || empty($apiKey)) {
-            error_log('[PeerReady] Plugin not configured — skipping submission ' . $submissionId);
+            error_log('[ScholarLens] Plugin not configured — skipping submission ' . $submissionId);
             return;
         }
 
@@ -137,7 +137,7 @@ class PeerReadyPlugin extends GenericPlugin
         }
 
         if (!$primaryFile) {
-            error_log('[PeerReady] No primary submission file found for submission ' . $submissionId);
+            error_log('[ScholarLens] No primary submission file found for submission ' . $submissionId);
             return;
         }
 
@@ -148,7 +148,7 @@ class PeerReadyPlugin extends GenericPlugin
         }
 
         if (!file_exists($filePath)) {
-            error_log('[PeerReady] File not found on disk: ' . $filePath);
+            error_log('[ScholarLens] File not found on disk: ' . $filePath);
             return;
         }
 
@@ -157,7 +157,7 @@ class PeerReadyPlugin extends GenericPlugin
         $title       = $publication ? $publication->getLocalizedTitle() : '';
         $abstract    = $publication ? strip_tags($publication->getLocalizedData('abstract')) : '';
 
-        // ── Step 3: Create a manuscript record in PeerReady ──────────────────
+        // ── Step 3: Create a manuscript record in ScholarLens ──────────────────
         $manuscriptResponse = $this->peerreadyPost(
             $apiBase . '/api/manuscripts',
             $apiKey,
@@ -169,13 +169,13 @@ class PeerReadyPlugin extends GenericPlugin
         );
 
         if (!isset($manuscriptResponse['id'])) {
-            error_log('[PeerReady] Failed to create manuscript: ' . json_encode($manuscriptResponse));
+            error_log('[ScholarLens] Failed to create manuscript: ' . json_encode($manuscriptResponse));
             return;
         }
 
         $manuscriptId = $manuscriptResponse['id'];
 
-        // ── Step 4: Upload the file to PeerReady /api/upload ─────────────────
+        // ── Step 4: Upload the file to ScholarLens /api/upload ─────────────────
         $uploadResponse = $this->peerreadyPostFile(
             $apiBase . '/api/upload',
             $apiKey,
@@ -185,7 +185,7 @@ class PeerReadyPlugin extends GenericPlugin
         );
 
         if (!isset($uploadResponse['draft']['id'])) {
-            error_log('[PeerReady] File upload failed: ' . json_encode($uploadResponse));
+            error_log('[ScholarLens] File upload failed: ' . json_encode($uploadResponse));
             return;
         }
 
@@ -204,7 +204,7 @@ class PeerReadyPlugin extends GenericPlugin
         );
 
         if (!isset($reviewResponse['sessionId'])) {
-            error_log('[PeerReady] Failed to start review: ' . json_encode($reviewResponse));
+            error_log('[ScholarLens] Failed to start review: ' . json_encode($reviewResponse));
             return;
         }
 
@@ -217,15 +217,15 @@ class PeerReadyPlugin extends GenericPlugin
         $submissionDao->updateSetting($submissionId, 'peerreadyStatus',       'reviewing',   'string');
         $submissionDao->updateSetting($submissionId, 'peerreadyApiBase',      $apiBase,      'string');
 
-        error_log('[PeerReady] Review started — submissionId=' . $submissionId . ' sessionId=' . $sessionId);
+        error_log('[ScholarLens] Review started — submissionId=' . $submissionId . ' sessionId=' . $sessionId);
     }
 
     // ─────────────────────────────────────────────
-    // Hook 2: Inject the "View PeerReady Report" button into workflow sidebar
+    // Hook 2: Inject the "View ScholarLens Report" button into workflow sidebar
     // ─────────────────────────────────────────────
 
     /**
-     * Adds a "View PeerReady Report" button to the OJS submission workflow sidebar.
+     * Adds a "View ScholarLens Report" button to the OJS submission workflow sidebar.
      *
      * @param string $hookName
      * @param array  $args  [0] => TemplateManager, [1] => template path
@@ -257,7 +257,7 @@ class PeerReadyPlugin extends GenericPlugin
             return false;
         }
 
-        // Build the PeerReady report URL
+        // Build the ScholarLens report URL
         $contextPath      = $request->getContext()->getPath();
         $reportUrl        = rtrim($apiBase ?? '', '/') . '/manuscripts/review/' . $sessionId;
         $callbackEndpoint = $request->getBaseUrl() . '/index.php/' . $contextPath . '/api/v1/peerready/status/' . $submissionId;
@@ -272,7 +272,7 @@ class PeerReadyPlugin extends GenericPlugin
         $templateMgr->registerPlugin(
             'function',
             'peerready_button',
-            [$this, 'smartyPeerReadyButton']
+            [$this, 'smartyScholarLensButton']
         );
 
         // Insert our sidebar partial into the workflow template
@@ -286,9 +286,9 @@ class PeerReadyPlugin extends GenericPlugin
     }
 
     /**
-     * Smarty function to render the PeerReady button in the sidebar.
+     * Smarty function to render the ScholarLens button in the sidebar.
      */
-    public function smartyPeerReadyButton(array $params, \Smarty_Internal_Template $smarty): string
+    public function smartyScholarLensButton(array $params, \Smarty_Internal_Template $smarty): string
     {
         return $smarty->fetch($this->getTemplateResource('peerreadySidebar.tpl'));
     }
@@ -298,7 +298,7 @@ class PeerReadyPlugin extends GenericPlugin
     // ─────────────────────────────────────────────
 
     /**
-     * Registers /api/v1/peerready/* so PeerReady can POST results back.
+     * Registers /api/v1/peerready/* so ScholarLens can POST results back.
      *
      * @param string $hookName
      * @param array  $args  [0] => &$page, [1] => &$op, [2] => &$sourceFile
@@ -347,8 +347,8 @@ class PeerReadyPlugin extends GenericPlugin
     public function manage($args, $request): \JSONMessage
     {
         if ($request->getUserVar('verb') === 'settings') {
-            $this->import('PeerReadySettingsForm');
-            $form = new \PeerReadySettingsForm($this, $request->getContext()->getId());
+            $this->import('ScholarLensSettingsForm');
+            $form = new \ScholarLensSettingsForm($this, $request->getContext()->getId());
 
             if ($request->getUserVar('save')) {
                 $form->readInputData();
@@ -370,7 +370,7 @@ class PeerReadyPlugin extends GenericPlugin
     // ─────────────────────────────────────────────
 
     /**
-     * POST JSON to PeerReady and return decoded response array.
+     * POST JSON to ScholarLens and return decoded response array.
      */
     private function peerreadyPost(
         string $url,
@@ -410,7 +410,7 @@ class PeerReadyPlugin extends GenericPlugin
     }
 
     /**
-     * POST a file + manuscriptId to PeerReady /api/upload using multipart form.
+     * POST a file + manuscriptId to ScholarLens /api/upload using multipart form.
      */
     private function peerreadyPostFile(
         string $url,
@@ -459,7 +459,7 @@ class PeerReadyPlugin extends GenericPlugin
     // ─────────────────────────────────────────────
 
     /**
-     * Build the callback URL PeerReady will POST to when review is complete.
+     * Build the callback URL ScholarLens will POST to when review is complete.
      */
     private function buildCallbackUrl(int $contextId, int $submissionId): string
     {

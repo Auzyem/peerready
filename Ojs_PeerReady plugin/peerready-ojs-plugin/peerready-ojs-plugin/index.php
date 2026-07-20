@@ -9,6 +9,6 @@
  * Directory: plugins/generic/peerready/index.php
  */
 
-require_once('PeerReadyPlugin.php');
+require_once('ScholarLensPlugin.php');
 
-return new APP\plugins\generic\peerready\PeerReadyPlugin();
+return new APP\plugins\generic\peerready\ScholarLensPlugin();

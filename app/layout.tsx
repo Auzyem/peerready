@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "PeerReady",
+  title: "ScholarLens",
   description: "AI-powered manuscript peer review",
 };
 

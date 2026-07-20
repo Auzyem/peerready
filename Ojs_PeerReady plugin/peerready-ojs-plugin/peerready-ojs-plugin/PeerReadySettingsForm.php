@@ -1,32 +1,32 @@
 <?php
 
 /**
- * PeerReadySettingsForm.php
+ * ScholarLensSettingsForm.php
  *
- * Admin settings form for the PeerReady OJS Plugin.
- * Accessible via Settings > Website > Plugins > PeerReady > Settings.
+ * Admin settings form for the ScholarLens OJS Plugin.
+ * Accessible via Settings > Website > Plugins > ScholarLens > Settings.
  *
  * Fields:
- *   peerreadyApiUrl   — Base URL of the PeerReady deployment, e.g. https://peerready.app
+ *   peerreadyApiUrl   — Base URL of the ScholarLens deployment, e.g. https://peerready.app
  *   peerreadyApiKey   — API key for server-to-server authentication (Bearer token)
  *   peerreadyAutoMode — Whether to trigger automatically on every submission (boolean)
  *
- * Directory: plugins/generic/peerready/PeerReadySettingsForm.php
+ * Directory: plugins/generic/peerready/ScholarLensSettingsForm.php
  */
 
 namespace APP\plugins\generic\peerready;
 
 use PKP\form\Form;
 
-class PeerReadySettingsForm extends Form
+class ScholarLensSettingsForm extends Form
 {
     /** @var int The journal context ID */
     private int $contextId;
 
-    /** @var PeerReadyPlugin */
-    private PeerReadyPlugin $plugin;
+    /** @var ScholarLensPlugin */
+    private ScholarLensPlugin $plugin;
 
-    public function __construct(PeerReadyPlugin $plugin, int $contextId)
+    public function __construct(ScholarLensPlugin $plugin, int $contextId)
     {
         $this->plugin    = $plugin;
         $this->contextId = $contextId;

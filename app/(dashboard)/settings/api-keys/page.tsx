@@ -120,7 +120,7 @@ export default function ApiKeysPage() {
               API keys require a Starter plan or above
             </div>
             <p className="mb-2.5 mt-1 text-xs text-[#92400E]">
-              Connect OJS, Zapier, or any external service to PeerReady by upgrading your plan.
+              Connect OJS, Zapier, or any external service to ScholarLens by upgrading your plan.
             </p>
             <Button asChild size="sm" className="bg-pr-teal hover:bg-pr-teal-600">
               <a href="/billing">View plans</a>

@@ -1,4 +1,4 @@
-# PeerReady — Adversarial Critique Design Spec
+# ScholarLens — Adversarial Critique Design Spec
 
 **Date:** 2026-05-30
 **Status:** Approved (brainstorming) — ready for implementation plan

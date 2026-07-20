@@ -1,4 +1,4 @@
-# PeerReady V2 — Phase 1 (Additive) Design
+# ScholarLens V2 — Phase 1 (Additive) Design
 
 **Date:** 2026-06-01
 **Status:** Approved (design), pending implementation plan
@@ -73,7 +73,7 @@ settings before relying on PostgREST access to new tables.
 ### `lib/pdf/ReviewReport.tsx`
 - `@react-pdf/renderer` document component.
 - **Decoupled from `review_number` and `compared_to_session`** (deferred features; columns
-  don't exist). Header reads "PeerReady — Review Report".
+  don't exist). Header reads "ScholarLens — Review Report".
 - Pages: (1) Cover + Overview (summary grid, strengths/weaknesses, score breakdown, inline
   annotations), (2) Adversarial, (3) Journals, (4) Progress — **rendered only when
   `session.score_delta` is present** (already populated by the existing pipeline).

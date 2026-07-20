@@ -1,4 +1,4 @@
-# PeerReady — Vertical Slice Design
+# ScholarLens — Vertical Slice Design
 
 **Date:** 2026-05-30
 **Status:** Approved (scope + architecture)
@@ -8,7 +8,7 @@
 
 ## 1. Purpose
 
-PeerReady is an AI peer review platform for academic researchers. A researcher uploads a
+ScholarLens is an AI peer review platform for academic researchers. A researcher uploads a
 manuscript (PDF/DOCX); the system parses it, runs it through a Claude review pipeline, and
 returns scored rubric dimensions, a verdict, and inline annotations. Later versions add
 adversarial critique, journal matching, progress comparison across drafts, and XLSX export.

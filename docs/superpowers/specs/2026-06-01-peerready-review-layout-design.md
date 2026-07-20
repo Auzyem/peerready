@@ -1,4 +1,4 @@
-# PeerReady — Review-Page Vertical-Nav Layout (Phase 4) Design
+# ScholarLens — Review-Page Vertical-Nav Layout (Phase 4) Design
 
 **Date:** 2026-06-01
 **Status:** Approved (design), pending implementation plan

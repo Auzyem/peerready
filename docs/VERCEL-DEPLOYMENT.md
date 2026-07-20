@@ -1,6 +1,6 @@
-# Deploying PeerReady to Vercel
+# Deploying ScholarLens to Vercel
 
-A step-by-step guide to deploy PeerReady (Next.js 14 + Supabase + Anthropic) to
+A step-by-step guide to deploy ScholarLens (Next.js 14 + Supabase + Anthropic) to
 Vercel from scratch. Follow the sections in order.
 
 ---
@@ -70,7 +70,7 @@ Configuration**:
 ## 2. Create the Vercel project
 
 1. Go to **vercel.com → Add New… → Project**.
-2. **Import** the PeerReady Git repository (authorize GitHub if prompted).
+2. **Import** the ScholarLens Git repository (authorize GitHub if prompted).
 3. Vercel auto-detects **Next.js**. Leave the defaults:
    - **Framework Preset:** Next.js
    - **Build Command:** `next build` (default)
@@ -84,7 +84,7 @@ Configuration**:
 
 ## 3. Add environment variables
 
-PeerReady reads exactly these. Required unless noted:
+ScholarLens reads exactly these. Required unless noted:
 
 | Variable | Required | Secret? | Purpose |
 |----------|:--------:|:-------:|---------|
