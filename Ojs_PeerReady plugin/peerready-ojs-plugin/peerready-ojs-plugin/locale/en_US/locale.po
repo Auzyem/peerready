@@ -1,14 +1,14 @@
 # locale/en_US/locale.po
 #
-# PeerReady OJS Plugin — English locale strings
-# Directory: plugins/generic/peerready/locale/en_US/locale.po
+# ScholarLens OJS Plugin — English locale strings
+# Directory: plugins/generic/scholarlens/locale/en_US/locale.po
 #
 # All string keys are referenced by {translate key="..."} in Smarty templates
 # and __('...') in PHP.
 
 msgid ""
 msgstr ""
-"Project-Id-Version: PeerReady OJS Plugin 1.0.0\n"
+"Project-Id-Version: ScholarLens OJS Plugin 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-06-01 00:00+0000\n"
 "PO-Revision-Date: 2026-06-01 00:00+0000\n"
@@ -19,105 +19,105 @@ msgstr ""
 
 # ── Plugin identity ───────────────────────────────────────────────────────────
 
-msgid "plugins.generic.peerready.displayName"
-msgstr "PeerReady AI Manuscript Review"
+msgid "plugins.generic.scholarlens.displayName"
+msgstr "ScholarLens AI Manuscript Review"
 
-msgid "plugins.generic.peerready.description"
-msgstr "Automatically submits manuscripts to PeerReady for AI-powered peer review scoring, adversarial critique, and journal-fit recommendations. Review reports are attached to the OJS submission workflow."
+msgid "plugins.generic.scholarlens.description"
+msgstr "Automatically submits manuscripts to ScholarLens for AI-powered peer review scoring, adversarial critique, and journal-fit recommendations. Review reports are attached to the OJS submission workflow."
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
-msgid "plugins.generic.peerready.sidebarTitle"
-msgstr "PeerReady AI Review"
+msgid "plugins.generic.scholarlens.sidebarTitle"
+msgstr "ScholarLens AI Review"
 
-msgid "plugins.generic.peerready.viewReport"
+msgid "plugins.generic.scholarlens.viewReport"
 msgstr "View full report"
 
-msgid "plugins.generic.peerready.sessionId"
+msgid "plugins.generic.scholarlens.sessionId"
 msgstr "Session"
 
 # ── Status badges ─────────────────────────────────────────────────────────────
 
-msgid "plugins.generic.peerready.status.pending"
+msgid "plugins.generic.scholarlens.status.pending"
 msgstr "Pending"
 
-msgid "plugins.generic.peerready.status.reviewing"
+msgid "plugins.generic.scholarlens.status.reviewing"
 msgstr "Reviewing…"
 
-msgid "plugins.generic.peerready.status.complete"
+msgid "plugins.generic.scholarlens.status.complete"
 msgstr "Review complete"
 
-msgid "plugins.generic.peerready.status.failed"
+msgid "plugins.generic.scholarlens.status.failed"
 msgstr "Review failed"
 
 # ── Settings form ─────────────────────────────────────────────────────────────
 
-msgid "plugins.generic.peerready.settings.apiSection"
-msgstr "PeerReady connection settings"
+msgid "plugins.generic.scholarlens.settings.apiSection"
+msgstr "ScholarLens connection settings"
 
-msgid "plugins.generic.peerready.settings.apiSectionDescription"
-msgstr "Enter the URL and API key for your PeerReady deployment. These credentials are used to authenticate all server-to-server communication between OJS and PeerReady."
+msgid "plugins.generic.scholarlens.settings.apiSectionDescription"
+msgstr "Enter the URL and API key for your ScholarLens deployment. These credentials are used to authenticate all server-to-server communication between OJS and ScholarLens."
 
-msgid "plugins.generic.peerready.settings.apiUrl"
-msgstr "PeerReady URL"
+msgid "plugins.generic.scholarlens.settings.apiUrl"
+msgstr "ScholarLens URL"
 
-msgid "plugins.generic.peerready.settings.apiUrlDescription"
-msgstr "The base URL of your PeerReady deployment. For example: https://peerready.yourinstitution.ac.ug"
+msgid "plugins.generic.scholarlens.settings.apiUrlDescription"
+msgstr "The base URL of your ScholarLens deployment. For example: https://scholarlens.yourinstitution.ac.ug"
 
-msgid "plugins.generic.peerready.settings.apiUrlRequired"
-msgstr "A valid PeerReady URL is required."
+msgid "plugins.generic.scholarlens.settings.apiUrlRequired"
+msgstr "A valid ScholarLens URL is required."
 
-msgid "plugins.generic.peerready.settings.apiKey"
+msgid "plugins.generic.scholarlens.settings.apiKey"
 msgstr "API key"
 
-msgid "plugins.generic.peerready.settings.apiKeyDescription"
-msgstr "The PeerReady API key for this journal, created under Settings > API keys in your PeerReady account. Used as a Bearer token in all requests. Keep this confidential."
+msgid "plugins.generic.scholarlens.settings.apiKeyDescription"
+msgstr "The ScholarLens API key for this journal, created under Settings > API keys in your ScholarLens account. Used as a Bearer token in all requests. Keep this confidential."
 
-msgid "plugins.generic.peerready.settings.apiKeyDescriptionV2"
-msgstr "Create an API key in your PeerReady account under Settings > API keys. The key needs scopes: review:write, manuscript:write, webhook:manage. It should begin with pr_live_"
+msgid "plugins.generic.scholarlens.settings.apiKeyDescriptionV2"
+msgstr "Create an API key in your ScholarLens account under Settings > API keys. The key needs scopes: review:write, manuscript:write, webhook:manage. It should begin with pr_live_"
 
-msgid "plugins.generic.peerready.settings.apiKeyRequired"
+msgid "plugins.generic.scholarlens.settings.apiKeyRequired"
 msgstr "An API key is required."
 
-msgid "plugins.generic.peerready.settings.autoMode"
+msgid "plugins.generic.scholarlens.settings.autoMode"
 msgstr "Automatically review all new submissions"
 
-msgid "plugins.generic.peerready.settings.autoModeDescription"
-msgstr "When enabled, every new manuscript submitted to this journal will be automatically sent to PeerReady for AI review. Disable if you prefer to trigger reviews manually."
+msgid "plugins.generic.scholarlens.settings.autoModeDescription"
+msgstr "When enabled, every new manuscript submitted to this journal will be automatically sent to ScholarLens for AI review. Disable if you prefer to trigger reviews manually."
 
-msgid "plugins.generic.peerready.settings.testConnection"
+msgid "plugins.generic.scholarlens.settings.testConnection"
 msgstr "Test connection"
 
-msgid "plugins.generic.peerready.settings.testTesting"
+msgid "plugins.generic.scholarlens.settings.testTesting"
 msgstr "Testing…"
 
-msgid "plugins.generic.peerready.settings.testSuccess"
+msgid "plugins.generic.scholarlens.settings.testSuccess"
 msgstr "Connected successfully."
 
-msgid "plugins.generic.peerready.settings.testFailed"
+msgid "plugins.generic.scholarlens.settings.testFailed"
 msgstr "Connection failed."
 
-msgid "plugins.generic.peerready.settings.testError"
+msgid "plugins.generic.scholarlens.settings.testError"
 msgstr "Error:"
 
-msgid "plugins.generic.peerready.settings.testMissingFields"
+msgid "plugins.generic.scholarlens.settings.testMissingFields"
 msgstr "Please enter a URL and API key before testing."
 
 # ── Email notification ────────────────────────────────────────────────────────
 
 msgid "emails.PEERREADY_REVIEW_COMPLETE.name"
-msgstr "PeerReady review complete"
+msgstr "ScholarLens review complete"
 
 msgid "emails.PEERREADY_REVIEW_COMPLETE.description"
-msgstr "Sent to the assigned editor when PeerReady completes an AI review."
+msgstr "Sent to the assigned editor when ScholarLens completes an AI review."
 
 msgid "emails.PEERREADY_REVIEW_COMPLETE.subject"
-msgstr "PeerReady review complete: {$title}"
+msgstr "ScholarLens review complete: {$title}"
 
 msgid "emails.PEERREADY_REVIEW_COMPLETE.body"
 msgstr "Dear {$editorName},
 
-The PeerReady AI review for the following submission has completed.
+The ScholarLens AI review for the following submission has completed.
 
 Title: {$title}
 Submission ID: {$submissionId}
@@ -127,7 +127,7 @@ Overall Score: {$score}/80
 You can view the full review report here:
 {$reportUrl}
 
-This is an automated notification from the PeerReady OJS Plugin.
+This is an automated notification from the ScholarLens OJS Plugin.
 
 Best regards,
-The PeerReady System"
+The ScholarLens System"

@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 14 App Router, TypeScript, Tailwind + shadcn, `next-themes`, Vitest (node).
 
-**Source spec:** `docs/superpowers/specs/2026-06-01-peerready-brand-foundation-design.md`.
+**Source spec:** `docs/superpowers/specs/2026-06-01-scholarlens-brand-foundation-design.md`.
 
 **House rules:** gate every commit on `npm run build` (`npm test` is lenient). Branch `feat/design-foundation` (already checked out; spec already committed there).
 

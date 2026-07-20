@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 14 App Router, TypeScript, Supabase (SSR), Tailwind/shadcn, `@react-pdf/renderer`, Vitest (node).
 
-**Source spec:** `docs/superpowers/specs/2026-06-01-peerready-review-sequencing-design.md`.
+**Source spec:** `docs/superpowers/specs/2026-06-01-scholarlens-review-sequencing-design.md`.
 
 **House rules:** gate every commit on `npm run build` (`npm test` is lenient); new review-session relations go in all select sites (status/export/PDF). The Supabase CLI is wired — migrations apply with `npx supabase db push --yes`.
 

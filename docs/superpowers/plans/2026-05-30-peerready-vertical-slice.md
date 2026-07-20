@@ -8,14 +8,14 @@
 
 **Tech Stack:** Next.js 14, TypeScript, Tailwind + shadcn/ui, Supabase (Postgres/Auth/Storage), Anthropic SDK (`claude-sonnet-4-20250514`), `pdf-parse`, `mammoth`, `@vercel/functions`, Vitest.
 
-**Working directory:** `C:\Users\emm24\dev\Claude\peerready` (git already initialized, `main` branch).
+**Working directory:** `C:\Users\emm24\dev\Claude\scholarlens` (git already initialized, `main` branch).
 
 ---
 
 ## File Structure
 
 ```
-peerready/
+scholarlens/
   app/
     layout.tsx                                  root layout
     globals.css
@@ -78,7 +78,7 @@ The directory already exists with `docs/` and `.git`. Scaffold in place.
 
 Run:
 ```bash
-cd "C:/Users/emm24/dev/Claude/peerready"
+cd "C:/Users/emm24/dev/Claude/scholarlens"
 npx create-next-app@14 . --ts --tailwind --eslint --app --src-dir=false --import-alias "@/*" --no-turbopack
 ```
 Expected: prompts to proceed in a non-empty dir → yes. Creates `app/`, `next.config.mjs` (we replace with `.js`), `tsconfig.json`, `tailwind.config.ts`, `package.json`.

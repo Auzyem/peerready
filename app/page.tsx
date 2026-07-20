@@ -165,7 +165,7 @@ export default function Home() {
               Get started free <ArrowRight className="h-4 w-4" />
             </Link>
             <a
-              href="mailto:hello@peerready.app"
+              href="mailto:hello@scholarlens.ac"
               className="inline-flex items-center gap-2 rounded-md border border-white/30 px-5 py-3 font-medium text-white hover:bg-white/10"
             >
               <Mail className="h-4 w-4" /> Contact us
@@ -180,7 +180,7 @@ export default function Home() {
           <div className="flex gap-4">
             <Link href="/login" className="hover:text-pr-navy">Log in</Link>
             <Link href="/signup" className="hover:text-pr-navy">Sign up</Link>
-            <a href="mailto:hello@peerready.app" className="hover:text-pr-navy">Contact</a>
+            <a href="mailto:hello@scholarlens.ac" className="hover:text-pr-navy">Contact</a>
           </div>
         </div>
       </footer>

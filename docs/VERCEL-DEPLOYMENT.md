@@ -52,9 +52,9 @@ project restart does **not** fix this — only the exposed-schemas setting does.
 
 **1.4 — Configure Auth URLs for production.** Supabase → **Authentication → URL
 Configuration**:
-- **Site URL** → your Vercel production domain (e.g. `https://peerready.vercel.app`).
+- **Site URL** → your Vercel production domain (e.g. `https://scholarlens.vercel.app`).
   You can set a placeholder now and update it after step 3 once you know the domain.
-- **Redirect URLs** → add `https://peerready.vercel.app/**` and, for preview
+- **Redirect URLs** → add `https://scholarlens.vercel.app/**` and, for preview
   deployments, `https://*.vercel.app/**`.
 - For **email confirmation**: **Authentication → Providers → Email** — enable
   "Confirm email" for production (or leave it off for quick testing). If it's on,
@@ -118,7 +118,7 @@ select the environments, **Save**.
 - If you added env vars before the first deploy: click **Deploy** on the import
   screen (or trigger a deploy from the Deployments tab).
 - Vercel builds (`next build`) and gives you a URL like
-  `https://peerready-xxxx.vercel.app`.
+  `https://scholarlens-xxxx.vercel.app`.
 
 **CLI alternative** (optional):
 ```bash

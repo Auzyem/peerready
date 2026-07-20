@@ -140,7 +140,7 @@ the admin UI after the confirmation dialog when a price field changed. Steps:
    - annual: `round(price_annual_monthly_usd × 12 × 100)` — the yearly total
      (the `$8/mo → $96/yr` convention, matching the current live prices).
 2. **Find the plan's Stripe product** — from the current active price's `product`,
-   or by `metadata.peerready_plan` if no active price exists yet.
+   or by `metadata.scholarlens_plan` if no active price exists yet.
 3. **Create the new Stripe price** on that product (`unit_amount`, `currency: usd`,
    `recurring.interval` month/year), with `transfer_lookup_key: true` so the stable
    `pr_<plan>_<interval>` lookup key moves from the old price to the new one.

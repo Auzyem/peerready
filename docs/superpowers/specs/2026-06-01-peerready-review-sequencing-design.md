@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-01
 **Status:** Approved (design), pending implementation plan
-**Source:** `peerready-v2-upgrade-prompt.md` UPGRADE 1 (review sequencing) + UPGRADE 6 (stages API), reconciled against the live codebase. Deferred from V2 Phase 1.
+**Source:** `scholarlens-v2-upgrade-prompt.md` UPGRADE 1 (review sequencing) + UPGRADE 6 (stages API), reconciled against the live codebase. Deferred from V2 Phase 1.
 
 ## Context
 

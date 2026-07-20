@@ -7,7 +7,7 @@
  *
  * Endpoints exposed:
  *
- *   POST /index.php/{contextPath}/api/v1/peerready/review-complete/{submissionId}
+ *   POST /index.php/{contextPath}/api/v1/scholarlens/review-complete/{submissionId}
  *     Called by ScholarLens when the AI review pipeline completes.
  *     Body (JSON):
  *       sessionId    string  — ScholarLens review session ID
@@ -17,19 +17,19 @@
  *       reportUrl    string  — URL to the full ScholarLens review dashboard
  *     Response: 200 {"ok": true}
  *
- *   GET /index.php/{contextPath}/api/v1/peerready/status/{submissionId}
+ *   GET /index.php/{contextPath}/api/v1/scholarlens/status/{submissionId}
  *     Returns the current ScholarLens review status for a submission.
  *     Used by the OJS sidebar button to show live status.
  *     Response: 200 {"status": "reviewing"|"complete"|"failed", "sessionId": "...", "reportUrl": "..."}
  *
- * Directory: plugins/generic/peerready/api/v1/peerready/ScholarLensApiHandler.php
+ * Directory: plugins/generic/scholarlens/api/v1/scholarlens/ScholarLensApiHandler.php
  *
  * Security:
  *   review-complete: validates a shared webhook secret in the Authorization header.
  *   status: requires an authenticated OJS editor or admin session.
  */
 
-namespace APP\plugins\generic\peerready\api\v1\peerready;
+namespace APP\plugins\generic\scholarlens\api\v1\scholarlens;
 
 use PKP\handler\APIHandler;
 use PKP\security\authorization\ContextAccessPolicy;
@@ -40,7 +40,7 @@ class ScholarLensApiHandler extends APIHandler
 {
     public function __construct()
     {
-        $this->_handlerPath = 'peerready';
+        $this->_handlerPath = 'scholarlens';
 
         // Route definitions for Slim router
         $this->_routes = [
@@ -63,7 +63,7 @@ class ScholarLensApiHandler extends APIHandler
     }
 
     // ─────────────────────────────────────────────
-    // POST /api/v1/peerready/review-complete/{submissionId}
+    // POST /api/v1/scholarlens/review-complete/{submissionId}
     // ─────────────────────────────────────────────
 
     /**
@@ -89,9 +89,9 @@ class ScholarLensApiHandler extends APIHandler
             return $response->withStatus(404)->withJson(['error' => 'Submission not found']);
         }
 
-        $plugin     = \PluginRegistry::getPlugin('generic', 'peerreadyplugin');
+        $plugin     = \PluginRegistry::getPlugin('generic', 'scholarlensplugin');
         $contextId  = $submission->getData('contextId');
-        $expectedKey = $plugin ? $plugin->getSetting($contextId, 'peerreadyApiKey') : null;
+        $expectedKey = $plugin ? $plugin->getSetting($contextId, 'scholarlensApiKey') : null;
 
         if (!$expectedKey || !hash_equals($expectedKey, $token)) {
             return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);
@@ -110,9 +110,9 @@ class ScholarLensApiHandler extends APIHandler
         }
 
         // ── Update submission settings in OJS ─────────────────────────────────
-        $submissionDao->updateSetting($submissionId, 'peerreadyStatus',  'complete', 'string');
-        $submissionDao->updateSetting($submissionId, 'peerreadyVerdict', $verdict,   'string');
-        $submissionDao->updateSetting($submissionId, 'peerreadyScore',   $score,     'int');
+        $submissionDao->updateSetting($submissionId, 'scholarlensStatus',  'complete', 'string');
+        $submissionDao->updateSetting($submissionId, 'scholarlensVerdict', $verdict,   'string');
+        $submissionDao->updateSetting($submissionId, 'scholarlensScore',   $score,     'int');
 
         // ── Create an editorial discussion note ───────────────────────────────
         $this->createDiscussionNote($submission, $summaryNote, $verdict, $score, $reportUrl);
@@ -124,7 +124,7 @@ class ScholarLensApiHandler extends APIHandler
     }
 
     // ─────────────────────────────────────────────
-    // GET /api/v1/peerready/status/{submissionId}
+    // GET /api/v1/scholarlens/status/{submissionId}
     // ─────────────────────────────────────────────
 
     /**
@@ -135,11 +135,11 @@ class ScholarLensApiHandler extends APIHandler
         $submissionId  = (int) ($args['submissionId'] ?? 0);
         $submissionDao = \DAORegistry::getDAO('SubmissionDAO');
 
-        $status    = $submissionDao->getSetting($submissionId, 'peerreadyStatus');
-        $sessionId = $submissionDao->getSetting($submissionId, 'peerreadySessionId');
-        $verdict   = $submissionDao->getSetting($submissionId, 'peerreadyVerdict');
-        $score     = $submissionDao->getSetting($submissionId, 'peerreadyScore');
-        $apiBase   = $submissionDao->getSetting($submissionId, 'peerreadyApiBase');
+        $status    = $submissionDao->getSetting($submissionId, 'scholarlensStatus');
+        $sessionId = $submissionDao->getSetting($submissionId, 'scholarlensSessionId');
+        $verdict   = $submissionDao->getSetting($submissionId, 'scholarlensVerdict');
+        $score     = $submissionDao->getSetting($submissionId, 'scholarlensScore');
+        $apiBase   = $submissionDao->getSetting($submissionId, 'scholarlensApiBase');
 
         $reportUrl = $sessionId && $apiBase
             ? rtrim($apiBase, '/') . '/manuscripts/review/' . $sessionId

@@ -713,9 +713,9 @@ export async function POST(request: NextRequest) {
       const oldPrice = await stripe.prices.retrieve(oldPriceId)
       productId = typeof oldPrice.product === 'string' ? oldPrice.product : oldPrice.product?.id ?? null
     } else {
-      // Pre-backfill: locate the product by metadata.peerready_plan (matches scripts/stripe-setup.mjs).
+      // Pre-backfill: locate the product by metadata.scholarlens_plan (matches scripts/stripe-setup.mjs).
       for await (const product of stripe.products.list({ limit: 100 })) {
-        if (product.active && product.metadata?.peerready_plan === planId) {
+        if (product.active && product.metadata?.scholarlens_plan === planId) {
           productId = product.id
           break
         }
@@ -745,7 +745,7 @@ export async function POST(request: NextRequest) {
       recurring: { interval: interval === 'annual' ? 'year' : 'month' },
       lookup_key: `pr_${planId}_${interval}`,
       transfer_lookup_key: true, // move the stable lookup key off the old price
-      metadata: { peerready_plan: planId, peerready_interval: interval },
+      metadata: { scholarlens_plan: planId, scholarlens_interval: interval },
     })
 
     // 2) Atomic DB swap: old active row → inactive, new active row inserted.
@@ -983,5 +983,5 @@ Expected: build succeeds; all tests pass.
 
 - **Spec coverage:** plan_prices table + swap rpc (Task 1) → design §1; backfill (Task 6) → §2; resolvers with env fallback (Tasks 2–3) → §3; checkout/webhook rewiring (Tasks 4–5) → §3 consumers + grandfathering fix; sync-price endpoint with create-first ordering, no-op-on-unchanged, free-plan exclusion, best-effort archive (Task 7) → §4 + error-handling; UI confirm dialog + per-interval sync + non-price PATCH split (Task 8) → §5. Out-of-scope items (subscriber migration, caching, multi-currency, history UI) are intentionally absent.
 - **Type consistency:** `getActivePriceId(planId, interval)` and `resolvePlanFromPriceId(priceId)` signatures match between definition (Task 3), checkout (Task 4), and webhook (Task 5). `swap_plan_price` parameter names (`p_plan_id`, `p_interval`, `p_stripe_price_id`, `p_unit_amount`) match between the migration (Task 1) and the rpc call (Task 7). Display columns `price_monthly_usd` / `price_annual_monthly_usd` match the `plans` schema used in `AdminPlans.tsx` and `plans/route.ts`.
-- **Lookup key:** `pr_<plan>_<interval>` matches `scripts/stripe-setup.mjs:66`; product metadata key `peerready_plan` matches `:59`.
+- **Lookup key:** `pr_<plan>_<interval>` matches `scripts/stripe-setup.mjs:66`; product metadata key `scholarlens_plan` matches `:59`.
 ```

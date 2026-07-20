@@ -3,7 +3,7 @@
 This is the **vertical slice**: signup/login → create manuscript → upload (PDF/DOCX) →
 parse & store → AI pipeline (discipline routing → deep review) → review dashboard with
 verdict, 8 scored dimensions, and annotations. Built per
-`docs/superpowers/plans/2026-05-30-peerready-vertical-slice.md`.
+`docs/superpowers/plans/2026-05-30-scholarlens-vertical-slice.md`.
 
 ## What's built (and verified at build time)
 - Next.js 14 app, Tailwind + shadcn/ui, full Supabase schema migration, typed domain model

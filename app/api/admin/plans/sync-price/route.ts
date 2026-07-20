@@ -50,9 +50,9 @@ export async function POST(request: NextRequest) {
       const oldPrice = await stripe.prices.retrieve(oldPriceId)
       productId = typeof oldPrice.product === 'string' ? oldPrice.product : oldPrice.product?.id ?? null
     } else {
-      // Pre-backfill: locate the product by metadata.peerready_plan (matches scripts/stripe-setup.mjs).
+      // Pre-backfill: locate the product by metadata.scholarlens_plan (matches scripts/stripe-setup.mjs).
       for await (const product of stripe.products.list({ active: true, limit: 100 })) {
-        if (product.active && product.metadata?.peerready_plan === planId) {
+        if (product.active && product.metadata?.scholarlens_plan === planId) {
           productId = product.id
           break
         }
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       recurring: { interval: interval === 'annual' ? 'year' : 'month' },
       lookup_key: `pr_${planId}_${interval}`,
       transfer_lookup_key: true, // move the stable lookup key off the old price
-      metadata: { peerready_plan: planId, peerready_interval: interval },
+      metadata: { scholarlens_plan: planId, scholarlens_interval: interval },
     })
 
     // 2) Atomic DB swap: old active row → inactive, new active row inserted.

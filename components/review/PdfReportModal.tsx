@@ -38,7 +38,7 @@ export function PdfReportModal({ sessionId, manuscriptTitle, onClose }: Props) {
     if (!pdfUrl) return
     const a = document.createElement('a')
     a.href = pdfUrl
-    a.download = `peerready-review-${sessionId}.pdf`
+    a.download = `scholarlens-review-${sessionId}.pdf`
     a.click()
   }
 

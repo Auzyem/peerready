@@ -1,15 +1,15 @@
 /*
- * peerready.css
+ * scholarlens.css
  *
- * Styles for the PeerReady OJS Plugin sidebar and status indicators.
+ * Styles for the ScholarLens OJS Plugin sidebar and status indicators.
  * Loaded only on OJS backend pages (contexts: 'backend').
  *
- * Directory: plugins/generic/peerready/styles/peerready.css
+ * Directory: plugins/generic/scholarlens/styles/scholarlens.css
  */
 
 /* ── Sidebar block ──────────────────────────────────────────────────────────── */
 
-.peerready-sidebar-block {
+.scholarlens-sidebar-block {
     border: 1px solid #E2E8F0;
     border-radius: 6px;
     padding: 12px 14px;
@@ -17,7 +17,7 @@
     background: #F8FAFC;
 }
 
-.peerready-sidebar-block h3 {
+.scholarlens-sidebar-block h3 {
     font-size: 13px;
     font-weight: 600;
     color: #0D1B4B;
@@ -29,7 +29,7 @@
 
 /* ── Status badge ─────────────────────────────────────────────────────────── */
 
-.peerready-status-badge {
+.scholarlens-status-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -41,32 +41,32 @@
 }
 
 /* Pending */
-.peerready-status-pending {
+.scholarlens-status-pending {
     background: #F1F5F9;
     color: #64748B;
 }
 
 /* Reviewing — teal */
-.peerready-status-reviewing {
+.scholarlens-status-reviewing {
     background: #E6F4F1;
     color: #0E7C6B;
 }
 
 /* Complete — green */
-.peerready-status-complete {
+.scholarlens-status-complete {
     background: #DCFCE7;
     color: #15803D;
 }
 
 /* Failed — red */
-.peerready-status-failed {
+.scholarlens-status-failed {
     background: #FEE2E2;
     color: #B91C1C;
 }
 
 /* ── Status dot ───────────────────────────────────────────────────────────── */
 
-.peerready-dot {
+.scholarlens-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -76,26 +76,26 @@
 }
 
 /* Pulse animation for 'reviewing' state */
-.peerready-dot--pulse {
-    animation: peerready-pulse 1.4s ease-in-out infinite;
+.scholarlens-dot--pulse {
+    animation: scholarlens-pulse 1.4s ease-in-out infinite;
 }
 
-@keyframes peerready-pulse {
+@keyframes scholarlens-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50%       { opacity: 0.5; transform: scale(0.7); }
 }
 
-.peerready-dot--done {
+.scholarlens-dot--done {
     background: #15803D;
 }
 
-.peerready-dot--fail {
+.scholarlens-dot--fail {
     background: #B91C1C;
 }
 
 /* ── View report button ───────────────────────────────────────────────────── */
 
-.peerready-view-btn {
+.scholarlens-view-btn {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -114,25 +114,25 @@
     justify-content: center;
 }
 
-.peerready-view-btn:hover {
+.scholarlens-view-btn:hover {
     background: #16277A;
     color: #FFFFFF !important;
 }
 
-.peerready-icon-external {
+.scholarlens-icon-external {
     font-size: 11px;
     line-height: 1;
 }
 
 /* ── Session ID note ──────────────────────────────────────────────────────── */
 
-.peerready-session-id {
+.scholarlens-session-id {
     font-size: 11px;
     color: #94A3B8;
     margin: 4px 0 0;
 }
 
-.peerready-session-id code {
+.scholarlens-session-id code {
     font-family: monospace;
     font-size: 11px;
     background: #E2E8F0;
@@ -143,21 +143,21 @@
 
 /* ── Settings form extras ─────────────────────────────────────────────────── */
 
-.peerready-test-wrap {
+.scholarlens-test-wrap {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-top: 4px;
 }
 
-.peerready-test-result {
+.scholarlens-test-result {
     font-size: 13px;
 }
 
-.peerready-test-ok {
+.scholarlens-test-ok {
     color: #15803D;
 }
 
-.peerready-test-fail {
+.scholarlens-test-fail {
     color: #B91C1C;
 }

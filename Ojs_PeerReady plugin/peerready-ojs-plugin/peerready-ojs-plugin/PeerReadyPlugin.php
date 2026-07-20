@@ -10,13 +10,13 @@
  *   1. Hook fires when a new submission is submitted.
  *   2. Plugin POSTs the manuscript file + metadata to ScholarLens /api/upload.
  *   3. Plugin stores the ScholarLens session_id against the OJS submission.
- *   4. ScholarLens calls back to /api/v1/peerready/review-complete when done.
+ *   4. ScholarLens calls back to /api/v1/scholarlens/review-complete when done.
  *   5. Plugin attaches a discussion note and a sidebar link in OJS.
  *
- * Directory: plugins/generic/peerready/
+ * Directory: plugins/generic/scholarlens/
  */
 
-namespace APP\plugins\generic\peerready;
+namespace APP\plugins\generic\scholarlens;
 
 use PKP\plugins\GenericPlugin;
 use PKP\plugins\PluginRegistry;
@@ -32,12 +32,12 @@ class ScholarLensPlugin extends GenericPlugin
 
     public function getDisplayName(): string
     {
-        return __('plugins.generic.peerready.displayName');
+        return __('plugins.generic.scholarlens.displayName');
     }
 
     public function getDescription(): string
     {
-        return __('plugins.generic.peerready.description');
+        return __('plugins.generic.scholarlens.description');
     }
 
     // ─────────────────────────────────────────────
@@ -66,7 +66,7 @@ class ScholarLensPlugin extends GenericPlugin
             );
 
             // Hook 3: Register our custom REST API endpoint.
-            // ScholarLens calls POST /api/v1/peerready/review-complete when done.
+            // ScholarLens calls POST /api/v1/scholarlens/review-complete when done.
             \HookRegistry::register(
                 'LoadHandler',
                 [$this, 'registerApiHandler']
@@ -114,8 +114,8 @@ class ScholarLensPlugin extends GenericPlugin
     private function sendToScholarLens($submission): void
     {
         $submissionId = $submission->getId();
-        $apiBase      = $this->getSetting($submission->getData('contextId'), 'peerreadyApiUrl');
-        $apiKey       = $this->getSetting($submission->getData('contextId'), 'peerreadyApiKey');
+        $apiBase      = $this->getSetting($submission->getData('contextId'), 'scholarlensApiUrl');
+        $apiKey       = $this->getSetting($submission->getData('contextId'), 'scholarlensApiKey');
 
         if (empty($apiBase) || empty($apiKey)) {
             error_log('[ScholarLens] Plugin not configured — skipping submission ' . $submissionId);
@@ -158,7 +158,7 @@ class ScholarLensPlugin extends GenericPlugin
         $abstract    = $publication ? strip_tags($publication->getLocalizedData('abstract')) : '';
 
         // ── Step 3: Create a manuscript record in ScholarLens ──────────────────
-        $manuscriptResponse = $this->peerreadyPost(
+        $manuscriptResponse = $this->scholarlensPost(
             $apiBase . '/api/manuscripts',
             $apiKey,
             json_encode([
@@ -176,7 +176,7 @@ class ScholarLensPlugin extends GenericPlugin
         $manuscriptId = $manuscriptResponse['id'];
 
         // ── Step 4: Upload the file to ScholarLens /api/upload ─────────────────
-        $uploadResponse = $this->peerreadyPostFile(
+        $uploadResponse = $this->scholarlensPostFile(
             $apiBase . '/api/upload',
             $apiKey,
             $filePath,
@@ -192,7 +192,7 @@ class ScholarLensPlugin extends GenericPlugin
         $draftId = $uploadResponse['draft']['id'];
 
         // ── Step 5: Start the review session ─────────────────────────────────
-        $reviewResponse = $this->peerreadyPost(
+        $reviewResponse = $this->scholarlensPost(
             $apiBase . '/api/review/start',
             $apiKey,
             json_encode([
@@ -212,10 +212,10 @@ class ScholarLensPlugin extends GenericPlugin
 
         // ── Step 6: Store IDs in OJS submission settings ─────────────────────
         $submissionDao = \DAORegistry::getDAO('SubmissionDAO');
-        $submissionDao->updateSetting($submissionId, 'peerreadySessionId',    $sessionId,    'string');
-        $submissionDao->updateSetting($submissionId, 'peerreadyManuscriptId', $manuscriptId, 'string');
-        $submissionDao->updateSetting($submissionId, 'peerreadyStatus',       'reviewing',   'string');
-        $submissionDao->updateSetting($submissionId, 'peerreadyApiBase',      $apiBase,      'string');
+        $submissionDao->updateSetting($submissionId, 'scholarlensSessionId',    $sessionId,    'string');
+        $submissionDao->updateSetting($submissionId, 'scholarlensManuscriptId', $manuscriptId, 'string');
+        $submissionDao->updateSetting($submissionId, 'scholarlensStatus',       'reviewing',   'string');
+        $submissionDao->updateSetting($submissionId, 'scholarlensApiBase',      $apiBase,      'string');
 
         error_log('[ScholarLens] Review started — submissionId=' . $submissionId . ' sessionId=' . $sessionId);
     }
@@ -249,9 +249,9 @@ class ScholarLensPlugin extends GenericPlugin
         }
 
         $submissionDao = \DAORegistry::getDAO('SubmissionDAO');
-        $sessionId     = $submissionDao->getSetting($submissionId, 'peerreadySessionId');
-        $status        = $submissionDao->getSetting($submissionId, 'peerreadyStatus');
-        $apiBase       = $submissionDao->getSetting($submissionId, 'peerreadyApiBase');
+        $sessionId     = $submissionDao->getSetting($submissionId, 'scholarlensSessionId');
+        $status        = $submissionDao->getSetting($submissionId, 'scholarlensStatus');
+        $apiBase       = $submissionDao->getSetting($submissionId, 'scholarlensApiBase');
 
         if (!$sessionId) {
             return false;
@@ -260,25 +260,25 @@ class ScholarLensPlugin extends GenericPlugin
         // Build the ScholarLens report URL
         $contextPath      = $request->getContext()->getPath();
         $reportUrl        = rtrim($apiBase ?? '', '/') . '/manuscripts/review/' . $sessionId;
-        $callbackEndpoint = $request->getBaseUrl() . '/index.php/' . $contextPath . '/api/v1/peerready/status/' . $submissionId;
+        $callbackEndpoint = $request->getBaseUrl() . '/index.php/' . $contextPath . '/api/v1/scholarlens/status/' . $submissionId;
 
         $templateMgr->assign([
-            'peerreadySessionId' => $sessionId,
-            'peerreadyStatus'    => $status ?? 'pending',
-            'peerreadyReportUrl' => $reportUrl,
-            'peerreadyStatusUrl' => $callbackEndpoint,
+            'scholarlensSessionId' => $sessionId,
+            'scholarlensStatus'    => $status ?? 'pending',
+            'scholarlensReportUrl' => $reportUrl,
+            'scholarlensStatusUrl' => $callbackEndpoint,
         ]);
 
         $templateMgr->registerPlugin(
             'function',
-            'peerready_button',
+            'scholarlens_button',
             [$this, 'smartyScholarLensButton']
         );
 
         // Insert our sidebar partial into the workflow template
         $templateMgr->addStyleSheet(
-            'peerreadyStyles',
-            $request->getBaseUrl() . '/' . $this->getPluginPath() . '/styles/peerready.css',
+            'scholarlensStyles',
+            $request->getBaseUrl() . '/' . $this->getPluginPath() . '/styles/scholarlens.css',
             ['contexts' => 'backend']
         );
 
@@ -290,7 +290,7 @@ class ScholarLensPlugin extends GenericPlugin
      */
     public function smartyScholarLensButton(array $params, \Smarty_Internal_Template $smarty): string
     {
-        return $smarty->fetch($this->getTemplateResource('peerreadySidebar.tpl'));
+        return $smarty->fetch($this->getTemplateResource('scholarlensSidebar.tpl'));
     }
 
     // ─────────────────────────────────────────────
@@ -298,7 +298,7 @@ class ScholarLensPlugin extends GenericPlugin
     // ─────────────────────────────────────────────
 
     /**
-     * Registers /api/v1/peerready/* so ScholarLens can POST results back.
+     * Registers /api/v1/scholarlens/* so ScholarLens can POST results back.
      *
      * @param string $hookName
      * @param array  $args  [0] => &$page, [1] => &$op, [2] => &$sourceFile
@@ -372,7 +372,7 @@ class ScholarLensPlugin extends GenericPlugin
     /**
      * POST JSON to ScholarLens and return decoded response array.
      */
-    private function peerreadyPost(
+    private function scholarlensPost(
         string $url,
         string $apiKey,
         string $body,
@@ -412,7 +412,7 @@ class ScholarLensPlugin extends GenericPlugin
     /**
      * POST a file + manuscriptId to ScholarLens /api/upload using multipart form.
      */
-    private function peerreadyPostFile(
+    private function scholarlensPostFile(
         string $url,
         string $apiKey,
         string $filePath,
@@ -469,7 +469,7 @@ class ScholarLensPlugin extends GenericPlugin
 
         return $request->getBaseUrl()
             . '/index.php/' . $contextPath
-            . '/api/v1/peerready/review-complete/'
+            . '/api/v1/scholarlens/review-complete/'
             . $submissionId;
     }
 }

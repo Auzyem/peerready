@@ -256,7 +256,7 @@ export interface ApiKey {
 
 // Returned only at creation time — the plaintext is never retrievable again.
 export interface ApiKeyCreated extends Omit<ApiKey, 'key_hash'> {
-  plain_key: string    // e.g. pr_live_AbCdEfGh...
+  plain_key: string    // e.g. sl_live_AbCdEfGh...
 }
 
 export interface Webhook {

@@ -23,16 +23,16 @@ OJS installation (e.g. CUUL's) that runs the ScholarLens OJS plugin.
      - `webhook:manage`
    - **Expiry:** `Never expires` (or rotate on your own schedule).
 4. Click **Create key** and **copy the key immediately** — it starts with
-   `pr_live_` and is shown only once. If you lose it, revoke it and create a new one.
+   `sl_live_` and is shown only once. If you lose it, revoke it and create a new one.
 
 ## 2. Paste the key into the OJS plugin
 
 In the OJS plugin settings form, set the **ScholarLens API key** field
-(`peerreadyApiKey`) to the `pr_live_…` value you just copied, replacing any old
+(`scholarlensApiKey`) to the `sl_live_…` value you just copied, replacing any old
 shared key. The plugin sends it as:
 
 ```
-Authorization: Bearer pr_live_xxxxxxxx...
+Authorization: Bearer sl_live_xxxxxxxx...
 ```
 
 No other plugin changes are required — the request format is unchanged; only the
@@ -45,7 +45,7 @@ credential is now a scoped ScholarLens API key.
 - A `403` with `missing required scopes` means the key lacks one of the three
   scopes above — create a new key with all of them.
 - A `401 Invalid API key` means the key was mistyped, revoked, or belongs to a
-  different environment (`pr_test_` vs `pr_live_`).
+  different environment (`sl_test_` vs `sl_live_`).
 
 ## 4. Rotation / revocation
 

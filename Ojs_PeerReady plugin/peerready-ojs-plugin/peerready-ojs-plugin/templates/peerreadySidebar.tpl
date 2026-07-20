@@ -1,59 +1,59 @@
 {**
- * peerreadySidebar.tpl
+ * scholarlensSidebar.tpl
  *
  * Smarty template rendered in the OJS submission workflow sidebar.
- * Shows the PeerReady review status badge and a "View Report" button.
+ * Shows the ScholarLens review status badge and a "View Report" button.
  *
- * Template variables (set by PeerReadyPlugin::injectWorkflowButton):
- *   $peerreadyStatus      — 'pending' | 'reviewing' | 'complete' | 'failed'
- *   $peerreadySessionId   — PeerReady session UUID
- *   $peerreadyReportUrl   — Full URL to the PeerReady review dashboard
- *   $peerreadyStatusUrl   — OJS API endpoint for live status polling
+ * Template variables (set by ScholarLensPlugin::injectWorkflowButton):
+ *   $scholarlensStatus      — 'pending' | 'reviewing' | 'complete' | 'failed'
+ *   $scholarlensSessionId   — ScholarLens session UUID
+ *   $scholarlensReportUrl   — Full URL to the ScholarLens review dashboard
+ *   $scholarlensStatusUrl   — OJS API endpoint for live status polling
  *
- * Directory: plugins/generic/peerready/templates/peerreadySidebar.tpl
+ * Directory: plugins/generic/scholarlens/templates/scholarlensSidebar.tpl
  **}
 
-<div class="pkp_workflow_sidebar_block peerready-sidebar-block" id="peerready-block">
+<div class="pkp_workflow_sidebar_block scholarlens-sidebar-block" id="scholarlens-block">
     <h3 class="pkp_workflow_sidebar_block_header">
-        {translate key="plugins.generic.peerready.sidebarTitle"}
+        {translate key="plugins.generic.scholarlens.sidebarTitle"}
     </h3>
 
-    <div class="peerready-status-wrap">
+    <div class="scholarlens-status-wrap">
 
         {* ── Status badge ────────────────────────────────────────────────── *}
-        <div class="peerready-status-badge peerready-status-{$peerreadyStatus|escape}"
-             id="peerready-status-badge">
-            {if $peerreadyStatus === 'pending'}
-                <span class="peerready-dot"></span>
-                {translate key="plugins.generic.peerready.status.pending"}
-            {elseif $peerreadyStatus === 'reviewing'}
-                <span class="peerready-dot peerready-dot--pulse"></span>
-                {translate key="plugins.generic.peerready.status.reviewing"}
-            {elseif $peerreadyStatus === 'complete'}
-                <span class="peerready-dot peerready-dot--done"></span>
-                {translate key="plugins.generic.peerready.status.complete"}
-            {elseif $peerreadyStatus === 'failed'}
-                <span class="peerready-dot peerready-dot--fail"></span>
-                {translate key="plugins.generic.peerready.status.failed"}
+        <div class="scholarlens-status-badge scholarlens-status-{$scholarlensStatus|escape}"
+             id="scholarlens-status-badge">
+            {if $scholarlensStatus === 'pending'}
+                <span class="scholarlens-dot"></span>
+                {translate key="plugins.generic.scholarlens.status.pending"}
+            {elseif $scholarlensStatus === 'reviewing'}
+                <span class="scholarlens-dot scholarlens-dot--pulse"></span>
+                {translate key="plugins.generic.scholarlens.status.reviewing"}
+            {elseif $scholarlensStatus === 'complete'}
+                <span class="scholarlens-dot scholarlens-dot--done"></span>
+                {translate key="plugins.generic.scholarlens.status.complete"}
+            {elseif $scholarlensStatus === 'failed'}
+                <span class="scholarlens-dot scholarlens-dot--fail"></span>
+                {translate key="plugins.generic.scholarlens.status.failed"}
             {/if}
         </div>
 
         {* ── View report button (shown only when complete) ───────────────── *}
-        {if $peerreadyStatus === 'complete' && $peerreadyReportUrl}
-            <a href="{$peerreadyReportUrl|escape}"
+        {if $scholarlensStatus === 'complete' && $scholarlensReportUrl}
+            <a href="{$scholarlensReportUrl|escape}"
                target="_blank"
                rel="noopener noreferrer"
-               class="pkp_button peerready-view-btn">
-                {translate key="plugins.generic.peerready.viewReport"}
-                <span class="peerready-icon-external">&#8599;</span>
+               class="pkp_button scholarlens-view-btn">
+                {translate key="plugins.generic.scholarlens.viewReport"}
+                <span class="scholarlens-icon-external">&#8599;</span>
             </a>
         {/if}
 
         {* ── Session ID (small, for editorial reference) ─────────────────── *}
-        {if $peerreadySessionId}
-            <p class="peerready-session-id">
-                {translate key="plugins.generic.peerready.sessionId"}:
-                <code>{$peerreadySessionId|escape|truncate:12:"…":true}</code>
+        {if $scholarlensSessionId}
+            <p class="scholarlens-session-id">
+                {translate key="plugins.generic.scholarlens.sessionId"}:
+                <code>{$scholarlensSessionId|escape|truncate:12:"…":true}</code>
             </p>
         {/if}
 
@@ -61,29 +61,29 @@
 </div>
 
 {* ── Live polling script — refreshes the status badge every 20 seconds while reviewing *}
-{if $peerreadyStatus === 'pending' || $peerreadyStatus === 'reviewing'}
+{if $scholarlensStatus === 'pending' || $scholarlensStatus === 'reviewing'}
 <script>
 (function () {
-    var statusUrl  = '{$peerreadyStatusUrl|escape:"javascript"}';
-    var badge      = document.getElementById('peerready-status-badge');
+    var statusUrl  = '{$scholarlensStatusUrl|escape:"javascript"}';
+    var badge      = document.getElementById('scholarlens-status-badge');
     var pollHandle = null;
 
     var labels = {
-        pending:   '{translate key="plugins.generic.peerready.status.pending"|escape:"javascript"}',
-        reviewing: '{translate key="plugins.generic.peerready.status.reviewing"|escape:"javascript"}',
-        complete:  '{translate key="plugins.generic.peerready.status.complete"|escape:"javascript"}',
-        failed:    '{translate key="plugins.generic.peerready.status.failed"|escape:"javascript"}'
+        pending:   '{translate key="plugins.generic.scholarlens.status.pending"|escape:"javascript"}',
+        reviewing: '{translate key="plugins.generic.scholarlens.status.reviewing"|escape:"javascript"}',
+        complete:  '{translate key="plugins.generic.scholarlens.status.complete"|escape:"javascript"}',
+        failed:    '{translate key="plugins.generic.scholarlens.status.failed"|escape:"javascript"}'
     };
 
     function poll() {
         fetch(statusUrl, { credentials: 'same-origin' })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                badge.className = 'peerready-status-badge peerready-status-' + data.status;
-                badge.innerHTML = '<span class="peerready-dot' +
-                    (data.status === 'reviewing' ? ' peerready-dot--pulse' : '') +
-                    (data.status === 'complete'  ? ' peerready-dot--done'  : '') +
-                    (data.status === 'failed'    ? ' peerready-dot--fail'  : '') +
+                badge.className = 'scholarlens-status-badge scholarlens-status-' + data.status;
+                badge.innerHTML = '<span class="scholarlens-dot' +
+                    (data.status === 'reviewing' ? ' scholarlens-dot--pulse' : '') +
+                    (data.status === 'complete'  ? ' scholarlens-dot--done'  : '') +
+                    (data.status === 'failed'    ? ' scholarlens-dot--fail'  : '') +
                     '"></span>' + (labels[data.status] || data.status);
 
                 // If review is done reload the page to show the report button
@@ -93,7 +93,7 @@
                 }
             })
             .catch(function (err) {
-                console.warn('[PeerReady] Status poll error:', err);
+                console.warn('[ScholarLens] Status poll error:', err);
             });
     }
 

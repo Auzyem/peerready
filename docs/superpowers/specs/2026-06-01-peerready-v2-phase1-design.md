@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-01
 **Status:** Approved (design), pending implementation plan
-**Source:** `peerready-v2-upgrade-prompt.md` (8-upgrade spec), reconciled against the live codebase.
+**Source:** `scholarlens-v2-upgrade-prompt.md` (8-upgrade spec), reconciled against the live codebase.
 
 ## Context
 

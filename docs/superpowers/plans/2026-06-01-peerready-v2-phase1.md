@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 14 App Router, TypeScript, Supabase (SSR + service-role), Tailwind + shadcn, `@react-pdf/renderer`, `date-fns`, `stripe`, `@stripe/stripe-js`, Vitest (node).
 
-**Source spec:** `docs/superpowers/specs/2026-06-01-peerready-v2-phase1-design.md`. Original upgrade prompt: `c:\Users\emm24\Downloads\peerready-v2-upgrade-prompt.md`.
+**Source spec:** `docs/superpowers/specs/2026-06-01-scholarlens-v2-phase1-design.md`. Original upgrade prompt: `c:\Users\emm24\Downloads\scholarlens-v2-upgrade-prompt.md`.
 
 **House rules (from project memory):**
 - Gate every commit on `npm run build` (`npm test` is lenient — never rely on it alone).
@@ -949,7 +949,7 @@ export async function GET(
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename="peerready-review-${safeId}.pdf"`,
+      'Content-Disposition': `inline; filename="scholarlens-review-${safeId}.pdf"`,
     },
   })
 }
@@ -1020,7 +1020,7 @@ export function PdfReportModal({ sessionId, manuscriptTitle, onClose }: Props) {
     if (!pdfUrl) return
     const a = document.createElement('a')
     a.href = pdfUrl
-    a.download = `peerready-review-${sessionId}.pdf`
+    a.download = `scholarlens-review-${sessionId}.pdf`
     a.click()
   }
 

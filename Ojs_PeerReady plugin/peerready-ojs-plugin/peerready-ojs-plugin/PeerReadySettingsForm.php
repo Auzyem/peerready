@@ -7,14 +7,14 @@
  * Accessible via Settings > Website > Plugins > ScholarLens > Settings.
  *
  * Fields:
- *   peerreadyApiUrl   — Base URL of the ScholarLens deployment, e.g. https://peerready.app
- *   peerreadyApiKey   — API key for server-to-server authentication (Bearer token)
- *   peerreadyAutoMode — Whether to trigger automatically on every submission (boolean)
+ *   scholarlensApiUrl   — Base URL of the ScholarLens deployment, e.g. https://scholarlens.ac
+ *   scholarlensApiKey   — API key for server-to-server authentication (Bearer token)
+ *   scholarlensAutoMode — Whether to trigger automatically on every submission (boolean)
  *
- * Directory: plugins/generic/peerready/ScholarLensSettingsForm.php
+ * Directory: plugins/generic/scholarlens/ScholarLensSettingsForm.php
  */
 
-namespace APP\plugins\generic\peerready;
+namespace APP\plugins\generic\scholarlens;
 
 use PKP\form\Form;
 
@@ -35,10 +35,10 @@ class ScholarLensSettingsForm extends Form
 
         // Validation rules
         $this->addCheck(
-            new \FormValidatorURL($this, 'peerreadyApiUrl', 'required', 'plugins.generic.peerready.settings.apiUrlRequired')
+            new \FormValidatorURL($this, 'scholarlensApiUrl', 'required', 'plugins.generic.scholarlens.settings.apiUrlRequired')
         );
         $this->addCheck(
-            new \FormValidator($this, 'peerreadyApiKey', 'required', 'plugins.generic.peerready.settings.apiKeyRequired')
+            new \FormValidator($this, 'scholarlensApiKey', 'required', 'plugins.generic.scholarlens.settings.apiKeyRequired')
         );
         $this->addCheck(new \FormValidatorPost($this));
         $this->addCheck(new \FormValidatorCSRF($this));
@@ -49,9 +49,9 @@ class ScholarLensSettingsForm extends Form
      */
     public function initData(): void
     {
-        $this->setData('peerreadyApiUrl',   $this->plugin->getSetting($this->contextId, 'peerreadyApiUrl'));
-        $this->setData('peerreadyApiKey',   $this->plugin->getSetting($this->contextId, 'peerreadyApiKey'));
-        $this->setData('peerreadyAutoMode', $this->plugin->getSetting($this->contextId, 'peerreadyAutoMode') ?? true);
+        $this->setData('scholarlensApiUrl',   $this->plugin->getSetting($this->contextId, 'scholarlensApiUrl'));
+        $this->setData('scholarlensApiKey',   $this->plugin->getSetting($this->contextId, 'scholarlensApiKey'));
+        $this->setData('scholarlensAutoMode', $this->plugin->getSetting($this->contextId, 'scholarlensAutoMode') ?? true);
     }
 
     /**
@@ -59,7 +59,7 @@ class ScholarLensSettingsForm extends Form
      */
     public function readInputData(): void
     {
-        $this->readUserVars(['peerreadyApiUrl', 'peerreadyApiKey', 'peerreadyAutoMode']);
+        $this->readUserVars(['scholarlensApiUrl', 'scholarlensApiKey', 'scholarlensAutoMode']);
     }
 
     /**
@@ -67,9 +67,9 @@ class ScholarLensSettingsForm extends Form
      */
     public function execute(...$functionArgs): mixed
     {
-        $this->plugin->updateSetting($this->contextId, 'peerreadyApiUrl',   $this->getData('peerreadyApiUrl'),   'string');
-        $this->plugin->updateSetting($this->contextId, 'peerreadyApiKey',   $this->getData('peerreadyApiKey'),   'string');
-        $this->plugin->updateSetting($this->contextId, 'peerreadyAutoMode', (bool) $this->getData('peerreadyAutoMode'), 'bool');
+        $this->plugin->updateSetting($this->contextId, 'scholarlensApiUrl',   $this->getData('scholarlensApiUrl'),   'string');
+        $this->plugin->updateSetting($this->contextId, 'scholarlensApiKey',   $this->getData('scholarlensApiKey'),   'string');
+        $this->plugin->updateSetting($this->contextId, 'scholarlensAutoMode', (bool) $this->getData('scholarlensAutoMode'), 'bool');
 
         return parent::execute(...$functionArgs);
     }
