@@ -237,7 +237,7 @@ class ScholarLensApiHandler extends APIHandler
                     continue;
                 }
 
-                $mail = new \MailTemplate('PEERREADY_REVIEW_COMPLETE');
+                $mail = new \MailTemplate('SCHOLARLENS_REVIEW_COMPLETE');
                 $mail->setReplyTo(null);
                 $mail->addRecipient($editor->getEmail(), $editor->getFullName());
                 $mail->assignParams([

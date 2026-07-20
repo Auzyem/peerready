@@ -105,16 +105,16 @@ msgstr "Please enter a URL and API key before testing."
 
 # ── Email notification ────────────────────────────────────────────────────────
 
-msgid "emails.PEERREADY_REVIEW_COMPLETE.name"
+msgid "emails.SCHOLARLENS_REVIEW_COMPLETE.name"
 msgstr "ScholarLens review complete"
 
-msgid "emails.PEERREADY_REVIEW_COMPLETE.description"
+msgid "emails.SCHOLARLENS_REVIEW_COMPLETE.description"
 msgstr "Sent to the assigned editor when ScholarLens completes an AI review."
 
-msgid "emails.PEERREADY_REVIEW_COMPLETE.subject"
+msgid "emails.SCHOLARLENS_REVIEW_COMPLETE.subject"
 msgstr "ScholarLens review complete: {$title}"
 
-msgid "emails.PEERREADY_REVIEW_COMPLETE.body"
+msgid "emails.SCHOLARLENS_REVIEW_COMPLETE.body"
 msgstr "Dear {$editorName},
 
 The ScholarLens AI review for the following submission has completed.

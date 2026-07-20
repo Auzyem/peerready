@@ -10,7 +10,7 @@ create table if not exists public.api_keys (
   user_id      uuid references public.profiles(id) on delete cascade not null,
   name         text not null,
   key_hash     text not null,          -- bcrypt hash of the full key, never the plaintext
-  key_prefix   text not null,          -- 'pr_live_' or 'pr_test_'
+  key_prefix   text not null,          -- 'sl_live_' or 'sl_test_'
   key_suffix   text not null,          -- last 4 chars, for masked display
   scopes       text[] not null default '{}',
   environment  text check (environment in ('live','test')) default 'live',
